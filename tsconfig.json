@@ -28,7 +28,7 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     "tailwind.config.js",
-    "components/util/Provider.jsx"
-  ],
+    "components/util/Provider.tsx"
+, "app/layout.jsx", "components/AuthenticationMessage.jsx", "app/profile/page.jsx"  ],
   "exclude": ["node_modules"]
 }

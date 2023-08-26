@@ -28,54 +28,13 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast";
 import Loader from "@/components/Loader";
 import AuthenticationMessage from "@/components/AuthenticationMessage";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-
-type ProfileProps = {
-  email: {
-    type: String;
-  };
-  username: {
-    type: String;
-  };
-  initialized: {
-    type: Boolean;
-  };
-  displayName: {
-    type: String;
-  };
-  fullName: {
-    type: String;
-  };
-  stats: {
-    height: {
-      type: Number;
-    };
-    weight: {
-      type: Number;
-    };
-  };
-  goals: {
-    startingWeight: {
-      type: Number;
-    };
-    goalWeight: {
-      type: Number;
-    };
-    bulking: {
-      type: Boolean;
-    };
-    cutting: {
-      type: Boolean;
-    };
-  };
-  image: {
-    type: String;
-  };
-};
+import type ProfileProps from "@/types/ProfileProps";
 
 const formSchema = z.object({
   displayName: z
@@ -84,12 +43,12 @@ const formSchema = z.object({
       message: "Username must be at least 2 characters.",
     })
     .max(20, { message: "Username can be at most 20 characters." }),
-  height: z.number(),
-  weight: z.number(),
-  startingWeight: z.number(),
-  goalWeight: z.number(),
-  bulking: z.boolean(),
-  cutting: z.boolean(),
+  feet: z.coerce.number(),
+  inches: z.coerce.number(),
+  weight: z.coerce.number(),
+  startingWeight: z.coerce.number(),
+  goalWeight: z.coerce.number(),
+  phase: z.string(),
 });
 
 const Profile = () => {
@@ -98,26 +57,43 @@ const Profile = () => {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [editMode, setEditMode] = useState(false);
+  const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      displayName: "",
-      height: 0,
-      weight: 0,
-      startingWeight: 0,
-      goalWeight: 0,
-      bulking: false,
-      cutting: false,
-    },
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setSubmitting(true);
-    console.log(values);
+    const res = await fetch("/api/users/set-profile", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        userId: session?.user.id,
+        displayName: values.displayName,
+        feet: values.feet,
+        inches: values.inches,
+        goalWeight: values.goalWeight,
+        startingWeight: values.startingWeight,
+        weight: values.weight,
+        phase: values.phase,
+      }),
+    });
+
+    if (res.status === 200) {
+      getProfile();
+      setSubmitting(false);
+      setEditMode(false);
+      toast({
+        title: "Submitted successfully",
+        description: "Your data was submitted successfully",
+      });
+    }
   };
 
-  const getProfile = async (): Promise<void> => {
+  const getProfile = async () => {
     try {
       const res = await fetch(`/api/users/getuser/${session?.user?.id}`, {
         method: "GET",
@@ -155,7 +131,9 @@ const Profile = () => {
               <Form {...form}>
                 <form
                   onSubmit={form.handleSubmit(onSubmit)}
-                  className="space-y-8">
+                  className="space-y-4"
+                >
+                  <h1 className="text-xl font-bold">Display Settings</h1>
                   <FormField
                     control={form.control}
                     name="displayName"
@@ -173,17 +151,41 @@ const Profile = () => {
                       </FormItem>
                     )}
                   />
-                  <h1 className="text-lg font-semibold">Progress Metrics</h1>
+                  <h1 className="text-xl font-bold">Progress Metrics</h1>
                   <FormField
                     control={form.control}
-                    name="height"
+                    name="feet"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Height</FormLabel>
                         <FormControl>
-                          <Input placeholder="Height" {...field} />
+                          <Input
+                            type="number"
+                            placeholder="5"
+                            {...field}
+                            className="w-1/2"
+                          />
                         </FormControl>
-                        <FormDescription>Your current height</FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="inches"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            placeholder="8"
+                            {...field}
+                            className="w-1/2"
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          Your height (feet then inches)
+                        </FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -195,9 +197,16 @@ const Profile = () => {
                       <FormItem>
                         <FormLabel>Weight</FormLabel>
                         <FormControl>
-                          <Input placeholder="Weight" {...field} />
+                          <Input
+                            type="number"
+                            placeholder="160"
+                            {...field}
+                            className="w-1/2"
+                          />
                         </FormControl>
-                        <FormDescription>Your current weight</FormDescription>
+                        <FormDescription>
+                          Your current weight (lbs.)
+                        </FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -209,11 +218,68 @@ const Profile = () => {
                       <FormItem>
                         <FormLabel>Starting Weight</FormLabel>
                         <FormControl>
-                          <Input placeholder="Starting Weight" {...field} />
+                          <Input
+                            type="number"
+                            placeholder="150"
+                            {...field}
+                            className="w-1/2"
+                          />
                         </FormControl>
                         <FormDescription>
                           Your weight when you started taking fitness seriously
-                          (can be the same as current weight).
+                          (can be the same as current weight, in lbs.)
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="goalWeight"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Goal Weight</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            placeholder="180"
+                            {...field}
+                            className="w-1/2"
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          Your ideal weight. What weight do you want to be at 1
+                          year from now?
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="phase"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Bulking / Cutting / Maintaining</FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select a value" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="bulking">Bulking</SelectItem>
+                            <SelectItem value="cutting">Cutting</SelectItem>
+                            <SelectItem value="maintaining">
+                              Maintaining
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormDescription>
+                          Are you bulking, cutting, or maintaining?
                         </FormDescription>
                         <FormMessage />
                       </FormItem>
@@ -236,7 +302,20 @@ const Profile = () => {
             </CardHeader>
             <CardContent>
               {profile?.initialized ? (
-                <>{profile.username}</>
+                <>
+                  <h1>Display Name: {profile.displayName}</h1>
+                  <h1 className="text-xl font-semibold my-2">Stats</h1>
+                  <h1>
+                    Height: {profile.stats.height.feet.toString()}'
+                    {profile.stats.height.inches.toString()}"
+                  </h1>
+                  <h1>Weight: {profile.stats.weight.toString()} lbs.</h1> <h1 className="text-xl font-semibold my-2">Goals</h1>
+                  <h1>Starting Weight: {profile.goals.startingWeight.toString()} lbs.</h1>
+                  <h1>Goal Weight: {profile.goals.goalWeight.toString()} lbs.</h1>
+                  <h1>
+                    Currently: {profile.goals.phase.charAt(0).toUpperCase() + profile.goals.phase.slice(1)}
+                  </h1>
+                </>
               ) : (
                 <>
                   <h1 className="text-md font-semibold">
