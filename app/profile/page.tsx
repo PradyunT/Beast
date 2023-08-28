@@ -52,7 +52,7 @@ const formSchema = z.object({
 });
 
 const Profile = () => {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const [profile, setProfile] = useState<ProfileProps | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -107,17 +107,17 @@ const Profile = () => {
   };
 
   useEffect(() => {
-    if (session) {
+    if (status !== "loading") {
       getProfile();
     }
   }, [session]);
 
   return (
     <section className="profile">
-      {!session ? (
-        <AuthenticationMessage to="access your profile" />
-      ) : loading ? (
+      {loading ? (
         <Loader />
+      ) : !session ? (
+        <AuthenticationMessage to="access your profile" />
       ) : editMode ? (
         <>
           <Card>
@@ -131,8 +131,7 @@ const Profile = () => {
               <Form {...form}>
                 <form
                   onSubmit={form.handleSubmit(onSubmit)}
-                  className="space-y-4"
-                >
+                  className="space-y-4">
                   <h1 className="text-xl font-bold">Display Settings</h1>
                   <FormField
                     control={form.control}
@@ -263,8 +262,7 @@ const Profile = () => {
                         <FormLabel>Bulking / Cutting / Maintaining</FormLabel>
                         <Select
                           onValueChange={field.onChange}
-                          defaultValue={field.value}
-                        >
+                          defaultValue={field.value}>
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="Select a value" />
@@ -309,11 +307,19 @@ const Profile = () => {
                     Height: {profile.stats.height.feet.toString()}'
                     {profile.stats.height.inches.toString()}"
                   </h1>
-                  <h1>Weight: {profile.stats.weight.toString()} lbs.</h1> <h1 className="text-xl font-semibold my-2">Goals</h1>
-                  <h1>Starting Weight: {profile.goals.startingWeight.toString()} lbs.</h1>
-                  <h1>Goal Weight: {profile.goals.goalWeight.toString()} lbs.</h1>
+                  <h1>Weight: {profile.stats.weight.toString()} lbs.</h1>{" "}
+                  <h1 className="text-xl font-semibold my-2">Goals</h1>
                   <h1>
-                    Currently: {profile.goals.phase.charAt(0).toUpperCase() + profile.goals.phase.slice(1)}
+                    Starting Weight: {profile.goals.startingWeight.toString()}{" "}
+                    lbs.
+                  </h1>
+                  <h1>
+                    Goal Weight: {profile.goals.goalWeight.toString()} lbs.
+                  </h1>
+                  <h1>
+                    Currently:{" "}
+                    {profile.goals.phase.charAt(0).toUpperCase() +
+                      profile.goals.phase.slice(1)}
                   </h1>
                 </>
               ) : (

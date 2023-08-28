@@ -1,16 +1,28 @@
 import { connectToDB } from "@/utils/database";
-import User from "@/models/user"
-export const POST = async (req, {params}) => {
-    try {
-        await connectToDB();
-        
-        const currentDate = new Date().toISOString();
-        const foundUser = await User.findById(params.userId);
-        foundUser.workouts.push({date: currentDate});
-        await foundUser.save();
-        return new Response("Successfully tracked workout", {status: 200});
-    } catch (err) {
-        console.log(err);
-        return new Response("Failed to track workout", {status: 500});
-    }
-}
+import Workout from "@/models/Workout";
+import User from "@/models/user";
+
+export const POST = async ({ params }) => {
+  try {
+    await connectToDB();
+
+    // Create workout
+    const newWorkout = new Workout();
+
+    // Update user's workout array
+    const foundUser = await User.findById(params.userId).populate("workout");
+    foundUser.workouts.unshift(newWorkout._id);
+
+    // Set workout's userId
+    newWorkout.userId = foundUser._id;
+
+    // Save Workout and foundUser
+    await foundUser.save();
+    await newWorkout.save();
+
+    return new Response("Successfully tracked workout", { status: 200 });
+  } catch (err) {
+    console.log(err);
+    return new Response("Failed to track workout", { status: 500 });
+  }
+};

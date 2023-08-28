@@ -19,26 +19,39 @@ const userSchema = new Schema({
     default: false,
   },
   displayName: String,
+  tags: {
+    type: [
+      {
+        tag: {
+          type: String,
+        },
+      },
+    ],
+    default: [{ tag: "Rookie" }],
+  },
   fullName: String,
   stats: {
     height: {
       feet: Number,
-      inches: Number
+      inches: Number,
     },
     weight: Number,
   },
   goals: {
-    startingWeight:Number,
+    startingWeight: Number,
     goalWeight: Number,
     phase: {
-    type: String,
-    enum: ["bulking", "cutting", "maintaining"],
-    }
+      type: String,
+      enum: ["bulking", "cutting", "maintaining"],
+    },
   },
-  workouts: [{
-    date: String
-  }],
-  image: String
+  workouts: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "Workout",
+    },
+  ],
+  image: String,
 });
 
 const User = models.User || model("User", userSchema);

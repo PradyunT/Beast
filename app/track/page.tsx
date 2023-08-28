@@ -11,28 +11,92 @@ import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useToast } from "@/components/ui/use-toast";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+
+import { Textarea } from "@/components/ui/textarea";
+import * as z from "zod";
 import Loader from "@/components/Loader";
 import AuthenticationMessage from "@/components/AuthenticationMessage";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import axios from "axios";
 
 const gymLat = 33.212060808618546;
 const gymLong = -97.15406761440391;
-const radius = 1;
+// FIXME
+const radius = 1000;
+
+// For plain text input
+const formSchema = z.object({
+  workoutText: z.string().min(1).max(1000),
+});
+
+// For tracking in website
+const formSchema2 = z.object({
+  excersize: z.object({
+    name: z.string(),
+    sets: z.object({
+      reps: z.number(),
+      weight: z.number(),
+    }),
+  }),
+});
 
 const track = () => {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [trackMode, setTrackMode] = useState(false);
-  const {toast} = useToast();
+  const { toast } = useToast();
 
-  const handleTrackWorkout = async () => {
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+  });
+
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     setSubmitting(true);
+    console.log(values);
+    const res = await fetch(`/api/track/${session?.user?.id}`, {
+      method: "POST",
+    });
+
+    if (res.status === 200) {
+      toast({
+        title: "Workout submitted",
+        description: "Your workout has been tracked",
+      });
+    } else if (res.status === 500) {
+      toast({
+        title: "Error",
+        description: "Server error",
+      });
+    }
+    setSubmitting(false);
+  }
+
+  const verify = async () => {
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(async function (position) {
         const userLat = position.coords.latitude;
         const userLng = position.coords.longitude;
-        console.log("Coordinates: " + userLat + userLng)
         const radianConversion = (degrees: number) => degrees * (Math.PI / 180);
         const earthRadiusKm = 6371;
 
@@ -51,40 +115,70 @@ const track = () => {
 
         // Calculate the distance in kilometers
         const distanceKm = earthRadiusKm * c;
-        console.log("Your distance to Pohl Rec center in kilometers is: " + distanceKm)
+
         if (distanceKm < radius) {
-          console.log("You are in range of Pohl Rec center");
-          console.log(session?.user?.id);
-          const res = await fetch(`/api/track/${session?.user?.id}`, {
-            method: "POST"
-          })
-          if (res.status === 200) {
+          // If user is in range of Pohl Rec Center: Check if user's latest workout was within the past day
+          const res = await fetch(`/api/verify/${session?.user?.id}?userId=${session?.user?.id}`, {
+            method: "GET",
+          });
+          if (res.status === 500) {
+            setError(
+              "Server error while verifying if user can track workout today"
+            );
             toast({
-              title: "Workout submitted",
-              description: "Your workout has been tracked",
+              title: "Error",
+              description:
+                "Server error while verifying if user can track workout today",
             });
+          } else if (res.status === 403) {
+            // If user has already tracked workout today
+            setError("You have already tracked a workout today");
+            toast({
+              title: "Error",
+              description: "You have already tracked a workout today",
+            });
+          } else if (res.status === 200) {
+            // If user has not already tracked workout today: good to go
+            setTrackMode(true);
           }
-          setSubmitting(false);
+        } else {
+          // If user is out of range of Pohl Rec Center
+          setError(
+            `You are too far from Pohl Rec Center. Distance is ${distanceKm.toFixed(
+              2
+            )}`
+          );
+          toast({
+            title: "Error",
+            description: `You are too far from Pohl Rec Center. Distance is ${distanceKm.toFixed(
+              2
+            )}`,
+          });
         }
       });
     } else {
-      setError("Unable to get location. Check location permissions.")
+      // If geolocation is not in navigator object
+      setError("Unable to get location. Check location permissions.");
+      toast({
+        title: "Error",
+        description: "Unable to get location. Check location permissions.",
+      });
     }
   };
-    
+
   useEffect(() => {
-    if (session) {
+    if (status !== "loading") {
       setLoading(false);
     }
   }, [session]);
 
   return (
     <>
-      {!session ? (
-        <AuthenticationMessage to="track your workout" />
-      ) : loading ? (
+      {loading ? (
+        <Loader />
+      ) : !session ? (
         <>
-          <Loader/>
+          <AuthenticationMessage to="track your workout" />
         </>
       ) : (
         <Card>
@@ -95,11 +189,85 @@ const track = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {trackMode ? <><h1>Start tracking your workout now (requires location permission).</h1>
-            <h1 className="text-red-600">{error}</h1>
-            <Button className="mt-4" onClick={() => setTrackMode(true)} disabled={submitting}>
-              {submitting ? <>Submitting</> : <>Track Now</>}
-            </Button></> : <>Add workout link or Workout tracking features here</>}
+            {!trackMode ? (
+              <>
+                <h1>
+                  Start tracking your workout now (requires location
+                  permission).
+                </h1>
+                <Button
+                  className="mt-4"
+                  onClick={() => verify()}
+                  disabled={submitting}>
+                  Track Now
+                </Button>
+                <h1 className="text-red-600 mt-2">{error}</h1>
+              </>
+            ) : (
+              <>
+                <Form {...form}>
+                  <form
+                    onSubmit={form.handleSubmit(onSubmit)}
+                    className="space-y-8">
+                    <FormField
+                      control={form.control}
+                      name="workoutText"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Workout Text</FormLabel>
+                          <FormControl>
+                            <Textarea
+                              placeholder="Workout Text Here"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            Input the text generated from your workout tracker
+                            <Dialog>
+                              <DialogTrigger>
+                                <span className="ml-1 underline text-gray-600 hover:text-blue-500 transition-colors">
+                                  Example
+                                </span>
+                              </DialogTrigger>
+                              <DialogContent>
+                                <DialogHeader>
+                                  <DialogTitle>
+                                    Example Workout Text Input
+                                  </DialogTitle>
+                                  <DialogDescription>
+                                    PPL - PUSH Thursday, Aug 24, 2023 at 8:26pm
+                                    <br />
+                                    Bench Press (Dumbbell) Set 1: 112.5 lbs x 7
+                                    <br />
+                                    Set 2: 115 lbs x 7 Set 3: 115 lbs x 7<br />
+                                    [Failure] Seated Shoulder Press (Machine)
+                                    <br />
+                                    Set 1: 90 lbs x 12 Set 2: 100 lbs x 8 Set 3:
+                                    <br />
+                                    90 lbs x 10 Triceps Rope Pushdown Set 1: 35
+                                    <br />
+                                    lbs x 12 Set 2: 30 lbs x 12 Set 3: 37.5 lbs
+                                    <br />
+                                    x 12 [Failure] @hevyapp
+                                    <br />
+                                    https://hevy.com/workout/JZeyhzOREph
+                                    <br />
+                                  </DialogDescription>
+                                </DialogHeader>
+                              </DialogContent>
+                            </Dialog>
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <Button className="mt-4" type="submit">
+                      Finish Workout
+                    </Button>
+                  </form>
+                </Form>
+              </>
+            )}
           </CardContent>
         </Card>
       )}

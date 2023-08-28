@@ -4,7 +4,7 @@ const Footer = () => {
   return (
     <section className="footer ">
       <div className="w-full h-16 text-center mt-8">
-        Made with <Heart className="inline" /> by Pradyun Tandra
+        Built by Pradyun Tandra 💪
       </div>
     </section>
   );

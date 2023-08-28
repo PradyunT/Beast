@@ -1,23 +1,23 @@
 type ProfileProps = {
-    email: string;
-    username: string;
-    initialized: boolean;
-    displayName: string;
-    fullName: string;
-    stats: {
-      height: {
-        feet: number;
-        inches: number;
-      }
-      weight: number;
+  email: string;
+  username: string;
+  initialized: boolean;
+  displayName: string;
+  fullName: string;
+  stats: {
+    height: {
+      feet: number;
+      inches: number;
     };
-    goals: {
-      startingWeight: number;
-      goalWeight: number;
-      phase: string;
-    };
-    image: string;
+    weight: number;
   };
-  
-  export default ProfileProps;
-  
+  goals: {
+    startingWeight: number;
+    goalWeight: number;
+    phase: "bulking" | "cutting" | "maintaining";
+  };
+  image: string;
+  workouts: Array<string>;
+};
+
+export default ProfileProps;
