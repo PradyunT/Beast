@@ -143,7 +143,7 @@ const Profile = () => {
                           <Input placeholder="Display Name" {...field} />
                         </FormControl>
                         <FormDescription>
-                          This is your public display name. Make sure it's
+                          This is your public display name. Make sure it&apos;s
                           identifiable.
                         </FormDescription>
                         <FormMessage />
@@ -304,8 +304,8 @@ const Profile = () => {
                   <h1>Display Name: {profile.displayName}</h1>
                   <h1 className="text-xl font-semibold my-2">Stats</h1>
                   <h1>
-                    Height: {profile.stats.height.feet.toString()}'
-                    {profile.stats.height.inches.toString()}"
+                    Height: {profile.stats.height.feet.toString()}&apos;
+                    {profile.stats.height.inches.toString()}&quot;
                   </h1>
                   <h1>Weight: {profile.stats.weight.toString()} lbs.</h1>{" "}
                   <h1 className="text-xl font-semibold my-2">Goals</h1>

@@ -1,16 +1,21 @@
 import { connectToDB } from "@/utils/database";
-import Workout from "@/models/Workout";
 import User from "@/models/user";
+import Workout from "@/models/workout";
 
-export const POST = async ({ params }) => {
+export const POST = async (req, { params }) => {
   try {
     await connectToDB();
 
-    // Create workout
+    console.log(params.userId);
+    const { workout } = await req.json();
+
+    // Create workout and set name and exercises
     const newWorkout = new Workout();
+    newWorkout.name = workout.name;
+    newWorkout.exercises = workout.exercises;
 
     // Update user's workout array
-    const foundUser = await User.findById(params.userId).populate("workout");
+    const foundUser = await User.findById(params.userId).populate("workouts");
     foundUser.workouts.unshift(newWorkout._id);
 
     // Set workout's userId

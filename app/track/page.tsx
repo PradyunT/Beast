@@ -36,21 +36,40 @@ import Loader from "@/components/Loader";
 import AuthenticationMessage from "@/components/AuthenticationMessage";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import axios from "axios";
+
+// import type Exercise from "@/types/exercise";
+// import type Workout from "@/types/workout";
+// import type SetProps from "@/types/set";
+
+interface SetProps {
+  number: number;
+  reps: number;
+  weight: number;
+}
+
+interface Exercise {
+  name: string;
+  sets: SetProps[];
+}
+
+interface Workout {
+  name: string;
+  exercises: Exercise[];
+}
 
 const gymLat = 33.212060808618546;
 const gymLong = -97.15406761440391;
-// FIXME
-const radius = 1000;
+const radius = 1; // FIXME
 
 // For plain text input
 const formSchema = z.object({
   workoutText: z.string().min(1).max(1000),
 });
 
-// For tracking in website
+// For tracking in the website
+/*
 const formSchema2 = z.object({
-  excersize: z.object({
+  exercise: z.object({
     name: z.string(),
     sets: z.object({
       reps: z.number(),
@@ -58,24 +77,102 @@ const formSchema2 = z.object({
     }),
   }),
 });
+*/
 
-const track = () => {
+const Track = () => {
   const { data: session, status } = useSession();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
-  const [trackMode, setTrackMode] = useState(false);
+  const [trackMode, setTrackMode] = useState(true); // FIXME
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
   });
 
+  // Function to parse workout text input
+  function parseWorkoutText(workoutText: string) {
+    const workout: Workout = {
+      name: "",
+      exercises: [
+        {
+          name: "",
+          sets: [],
+        },
+      ],
+    };
+
+    const lines: Array<string> = workoutText.split("\n");
+    const exercises: Exercise[] = [
+      {
+        name: "",
+        sets: [
+          {
+            number: 0,
+            reps: 0,
+            weight: 0,
+          },
+        ],
+      },
+    ];
+    let currentExercise: Exercise | null = { name: "", sets: [] };
+
+    workout.name = lines[0];
+
+    for (let i = 0; i < lines.length; i++) {
+      // Check if the line contains "Set: "
+      const regex = /(Set )\w/;
+      const setRegex = /(\d+(?:\.\d+)?) lbs x (\d+)/;
+      // If the line contains "Set: "
+      if (regex.test(lines[i])) {
+        if (!currentExercise) {
+          // If there is not currently an exercise
+          // Initialize exercise and add exercise name from the previous line
+          currentExercise = { name: "", sets: [] };
+          currentExercise.name = lines[i - 1];
+          // Initialize set and add the first set
+          const match = lines[i].match(setRegex);
+          currentExercise.sets.push({
+            number: currentExercise.sets.length + 1,
+            weight: parseFloat(match?.[1] || "0"), // Parse as float
+            reps: parseInt(match?.[2] || "0"), // Parse as integer
+          });
+        } else {
+          // If there is currently an exercise
+          // Add set
+          const match = lines[i].match(setRegex);
+          currentExercise.sets.push({
+            number: currentExercise.sets.length + 1,
+            weight: parseFloat(match?.[1] || "0"), // Parse as float
+            reps: parseInt(match?.[2] || "0"), // Parse as integer
+          });
+        }
+      }
+
+      // If the line is blank and there is a current exercise
+      if (lines[i] === "" && currentExercise) {
+        // push currentExercise into exercises and reset currentExercise
+        exercises.push(currentExercise);
+        currentExercise = null;
+      }
+    }
+
+    workout.exercises = exercises;
+    return workout;
+  }
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setSubmitting(true);
-    console.log(values);
+    // Parse the workout text
+    const parsedWorkout = parseWorkoutText(values.workoutText);
+    console.log(parsedWorkout);
     const res = await fetch(`/api/track/${session?.user?.id}`, {
       method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ workout: parsedWorkout }),
     });
 
     if (res.status === 200) {
@@ -117,32 +214,32 @@ const track = () => {
         const distanceKm = earthRadiusKm * c;
 
         if (distanceKm < radius) {
-          // If user is in range of Pohl Rec Center: Check if user's latest workout was within the past day
-          const res = await fetch(`/api/verify/${session?.user?.id}?userId=${session?.user?.id}`, {
+          // If the user is in range of Pohl Rec Center: Check if the user's latest workout was within the past day
+          const res = await fetch(`/api/verify/${session?.user?.id}`, {
             method: "GET",
           });
           if (res.status === 500) {
             setError(
-              "Server error while verifying if user can track workout today"
+              "Server error while verifying if the user can track the workout today"
             );
             toast({
               title: "Error",
               description:
-                "Server error while verifying if user can track workout today",
+                "Server error while verifying if the user can track the workout today",
             });
           } else if (res.status === 403) {
-            // If user has already tracked workout today
+            // If the user has already tracked a workout today
             setError("You have already tracked a workout today");
             toast({
               title: "Error",
               description: "You have already tracked a workout today",
             });
           } else if (res.status === 200) {
-            // If user has not already tracked workout today: good to go
+            // If the user has not already tracked a workout today: good to go
             setTrackMode(true);
           }
         } else {
-          // If user is out of range of Pohl Rec Center
+          // If the user is out of range of Pohl Rec Center
           setError(
             `You are too far from Pohl Rec Center. Distance is ${distanceKm.toFixed(
               2
@@ -157,7 +254,7 @@ const track = () => {
         }
       });
     } else {
-      // If geolocation is not in navigator object
+      // If geolocation is not in the navigator object
       setError("Unable to get location. Check location permissions.");
       toast({
         title: "Error",
@@ -170,7 +267,7 @@ const track = () => {
     if (status !== "loading") {
       setLoading(false);
     }
-  }, [session]);
+  }, [session, status]);
 
   return (
     <>
@@ -185,7 +282,7 @@ const track = () => {
           <CardHeader>
             <CardTitle>Track Workout</CardTitle>
             <CardDescription>
-              Track your workouts when you're at Pohl Rec Center
+              Track your workouts when you&apos;re at Pohl Rec Center
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -275,4 +372,4 @@ const track = () => {
   );
 };
 
-export default track;
+export default Track;

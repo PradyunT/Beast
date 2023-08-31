@@ -15,8 +15,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-const leaderboard = () => {
-  const [users, setUsers] = useState<ProfileProps | null>(null);
+const Leaderboard = () => {
+  const [users, setUsers] = useState<ProfileProps[] | null>(null);
   const getUsers = async () => {
     const data = await fetch("/api/users/getusers", {
       method: "GET",
@@ -25,7 +25,8 @@ const leaderboard = () => {
     console.log(users);
     // Sort users by the number of workouts (in descending order)
     const sortedUsers = users.sort(
-      (a, b) => b.workouts.length - a.workouts.length
+      (a: ProfileProps, b: ProfileProps) =>
+        b.workouts.length - a.workouts.length
     );
     setUsers(sortedUsers);
   };
@@ -52,7 +53,7 @@ const leaderboard = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {users.map((user, i) => (
+              {users.map((user: ProfileProps, i) => (
                 <TableRow key={user._id}>
                   <TableCell>
                     <Avatar>
@@ -69,7 +70,7 @@ const leaderboard = () => {
                     ))}
                   </TableCell>
                   <TableCell>
-                    {user.workouts ? 0 : user.workouts.length()}
+                    {user.workouts ? user.workouts.length : 0}
                   </TableCell>
                   <TableCell>#{i + 1}</TableCell>
                 </TableRow>
@@ -81,4 +82,4 @@ const leaderboard = () => {
     </>
   );
 };
-export default leaderboard;
+export default Leaderboard;

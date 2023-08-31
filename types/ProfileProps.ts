@@ -1,4 +1,5 @@
 type ProfileProps = {
+  _id: string;
   email: string;
   username: string;
   initialized: boolean;
@@ -16,6 +17,7 @@ type ProfileProps = {
     goalWeight: number;
     phase: "bulking" | "cutting" | "maintaining";
   };
+  tags: { _id: string; tag: string }[];
   image: string;
   workouts: Array<string>;
 };
