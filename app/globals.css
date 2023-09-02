@@ -93,5 +93,5 @@
 }
 
 .header-link {
-  @apply hover:text-gray-700 text-black transition-colors cursor-pointer;
+  @apply hover:text-blue-500 text-black transition-colors cursor-pointer;
 }

@@ -18,8 +18,12 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body className={inter.className}>
         <Provider>
           <Toaster />
-          <Navbar />
-          <div className="w-max min-h-[85vh] mx-16 mt-8">{children}</div>
+          <div className="max-w-full">
+            <Navbar />
+          </div>
+          <div className="max-w-full min-h-[85vh] mx-10 mt-8 sm:mx-16">
+            {children}
+          </div>
           <Footer />
         </Provider>
       </body>
