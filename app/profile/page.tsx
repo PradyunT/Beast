@@ -17,6 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Form,
   FormControl,
@@ -35,6 +36,11 @@ import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import type ProfileProps from "@/types/ProfileProps";
+import ConsistencyForm from "@/components/forms/ConsistencyForm";
+import WeightForm from "@/components/forms/WeightForm";
+import StrengthForm from "@/components/forms/StrengthForm";
+import CardioForm from "@/components/forms/CardioForm";
+import GoalCard from "@/components/GoalCard";
 
 const formSchema = z.object({
   displayName: z
@@ -43,12 +49,6 @@ const formSchema = z.object({
       message: "Username must be at least 2 characters.",
     })
     .max(20, { message: "Username can be at most 20 characters." }),
-  feet: z.coerce.number(),
-  inches: z.coerce.number(),
-  weight: z.coerce.number(),
-  startingWeight: z.coerce.number(),
-  goalWeight: z.coerce.number(),
-  phase: z.string(),
 });
 
 const Profile = () => {
@@ -57,6 +57,7 @@ const Profile = () => {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [editMode, setEditMode] = useState(false);
+  const [createGoalMode, setCreateGoalMode] = useState(false);
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -73,12 +74,6 @@ const Profile = () => {
       body: JSON.stringify({
         userId: session?.user.id,
         displayName: values.displayName,
-        feet: values.feet,
-        inches: values.inches,
-        goalWeight: values.goalWeight,
-        startingWeight: values.startingWeight,
-        weight: values.weight,
-        phase: values.phase,
       }),
     });
 
@@ -100,6 +95,7 @@ const Profile = () => {
       });
       const data = await res.json();
       setProfile(data);
+      console.log(data);
       setLoading(false);
     } catch (err) {
       console.error("Error fetching profile: ", err);
@@ -150,139 +146,6 @@ const Profile = () => {
                       </FormItem>
                     )}
                   />
-                  <h1 className="text-xl font-bold">Progress Metrics</h1>
-                  <FormField
-                    control={form.control}
-                    name="feet"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Height</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            placeholder="5"
-                            {...field}
-                            className="w-1/2"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="inches"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            placeholder="8"
-                            {...field}
-                            className="w-1/2"
-                          />
-                        </FormControl>
-                        <FormDescription>
-                          Your height (feet then inches)
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="weight"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Weight</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            placeholder="160"
-                            {...field}
-                            className="w-1/2"
-                          />
-                        </FormControl>
-                        <FormDescription>
-                          Your current weight (lbs.)
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="startingWeight"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Starting Weight</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            placeholder="150"
-                            {...field}
-                            className="w-1/2"
-                          />
-                        </FormControl>
-                        <FormDescription>
-                          Your weight when you started taking fitness seriously
-                          (can be the same as current weight, in lbs.)
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="goalWeight"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Goal Weight</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            placeholder="180"
-                            {...field}
-                            className="w-1/2"
-                          />
-                        </FormControl>
-                        <FormDescription>
-                          Your ideal weight. What weight do you want to be at 1
-                          year from now?
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="phase"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Bulking / Cutting / Maintaining</FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select a value" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="bulking">Bulking</SelectItem>
-                            <SelectItem value="cutting">Cutting</SelectItem>
-                            <SelectItem value="maintaining">
-                              Maintaining
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormDescription>
-                          Are you bulking, cutting, or maintaining?
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
                   <Button type="submit" disabled={submitting}>
                     {submitting ? "Submitting" : "Submit"}
                   </Button>
@@ -291,9 +154,69 @@ const Profile = () => {
             </CardContent>
           </Card>
         </>
-      ) : (
+      ) : createGoalMode ? (
         <>
           <Card>
+            <CardHeader>
+              <CardTitle>Create Goal</CardTitle>
+              <CardDescription>
+                Create and set your fitness goal
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Tabs defaultValue="consistency" className="w-[400px]">
+                <TabsList className="mb-2">
+                  <TabsTrigger value="consistency">Consistency</TabsTrigger>
+                  <TabsTrigger value="weight">Weight</TabsTrigger>
+                  <TabsTrigger value="lift">Lift</TabsTrigger>
+                  <TabsTrigger value="cardio">Cardio</TabsTrigger>
+                  <TabsTrigger value="calisthenics">Calisthenics</TabsTrigger>
+                </TabsList>
+                <TabsContent value="consistency">
+                  <h1 className="text-xl font-bold mb-2">
+                    Set goal for consistency
+                  </h1>
+                  <ConsistencyForm />
+                </TabsContent>
+                <TabsContent value="weight">
+                  <h1 className="text-xl font-bold mb-2">
+                    Set goal for body weight
+                  </h1>
+                  <WeightForm />
+                </TabsContent>
+                <TabsContent value="lift">
+                  <h1 className="text-xl font-bold mb-2">
+                    Set goal for lifting strength
+                  </h1>
+                  <StrengthForm />
+                </TabsContent>
+                <TabsContent value="cardio">
+                  <h1 className="text-xl font-bold mb-2">
+                    Set goal for distance cardio
+                  </h1>
+                  <CardioForm />
+                </TabsContent>
+                <TabsContent value="calisthenics">
+                  Set goal for calisthenics WIP 🛠
+                </TabsContent>
+              </Tabs>
+            </CardContent>
+            <CardFooter>
+              <p>
+                Done setting goals?{" "}
+                <Button
+                  variant="secondary"
+                  onClick={() => setCreateGoalMode(false)}
+                  className="ml-2">
+                  Go Back
+                </Button>
+              </p>
+            </CardFooter>
+          </Card>
+        </>
+      ) : (
+        <>
+          <Card className="w-fit">
             <CardHeader>
               <CardTitle>Your Profile</CardTitle>
               <CardDescription>View and edit your profile</CardDescription>
@@ -301,39 +224,50 @@ const Profile = () => {
             <CardContent>
               {profile?.initialized ? (
                 <>
-                  <h1>Display Name: {profile.displayName}</h1>
-                  <h1 className="text-xl font-semibold my-2">Stats</h1>
-                  <h1>
-                    Height: {profile.stats.height.feet.toString()}&apos;
-                    {profile.stats.height.inches.toString()}&quot;
-                  </h1>
-                  <h1>Weight: {profile.stats.weight.toString()} lbs.</h1>{" "}
+                  <h1 className="text-lg font-semibold">Display</h1>
+                  <p> Display Name: {profile.displayName}</p>
                   <h1 className="text-xl font-semibold my-2">Goals</h1>
-                  <h1>
-                    Starting Weight: {profile.goals.startingWeight.toString()}{" "}
-                    lbs.
-                  </h1>
-                  <h1>
-                    Goal Weight: {profile.goals.goalWeight.toString()} lbs.
-                  </h1>
-                  <h1>
-                    Currently:{" "}
-                    {profile.goals.phase.charAt(0).toUpperCase() +
-                      profile.goals.phase.slice(1)}
-                  </h1>
+                  {profile?.goals ? (
+                    <>
+                      {profile.goals.map((goal, i) => {
+                        // if (goal.type === "consistency") {
+                        return <GoalCard goal={goal} key={i}/>;
+                        // } else if (goal.type === "weight") {
+                        //   return <>Render weight goal</>;
+                        // } else if (goal.type === "strength") {
+                        //   return <>Render strength goal</>;
+                        // } else if (goal.type === "distanceCardio") {
+                        //   return <>Render distance cardio goal</>;
+                        // }
+                      })}
+                    </>
+                  ) : (
+                    <p>
+                      You haven't set any goals yet. <br />
+                      Press "create goal" and set some goals.
+                    </p>
+                  )}
                 </>
               ) : (
                 <>
                   <h1 className="text-md font-semibold">
-                    Profile is not initialized
-                    <br />
-                    Click the edit button and enter your profile data
+                    Your profile hasn't been initialized yet. <br />
+                    Initialize your profile below.
                   </h1>
                 </>
               )}
             </CardContent>
             <CardFooter>
-              <Button onClick={() => setEditMode(true)}>Edit</Button>
+              <Button onClick={() => setEditMode(true)}>
+                {profile?.initialized ? "Edit Profile" : "Initialize"}
+              </Button>
+              <Button
+                onClick={() => setCreateGoalMode(true)}
+                disabled={!profile?.initialized}
+                variant={"secondary"}
+                className="ml-2 hover:bg-gray-200">
+                Create Goal
+              </Button>
             </CardFooter>
           </Card>
         </>

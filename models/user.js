@@ -30,21 +30,12 @@ const userSchema = new Schema({
     default: [{ tag: "Rookie" }],
   },
   fullName: String,
-  stats: {
-    height: {
-      feet: Number,
-      inches: Number,
+  goals: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "Goal",
     },
-    weight: Number,
-  },
-  goals: {
-    startingWeight: Number,
-    goalWeight: Number,
-    phase: {
-      type: String,
-      enum: ["bulking", "cutting", "maintaining"],
-    },
-  },
+  ],
   workouts: [
     {
       type: Schema.Types.ObjectId,

@@ -1,3 +1,6 @@
+import type goal from "./goal";
+import type workout from "./workout";
+
 type ProfileProps = {
   _id: string;
   email: string;
@@ -5,21 +8,10 @@ type ProfileProps = {
   initialized: boolean;
   displayName: string;
   fullName: string;
-  stats: {
-    height: {
-      feet: number;
-      inches: number;
-    };
-    weight: number;
-  };
-  goals: {
-    startingWeight: number;
-    goalWeight: number;
-    phase: "bulking" | "cutting" | "maintaining";
-  };
+  goals: goal[];
   tags: { _id: string; tag: string }[];
   image: string;
-  workouts: Array<string>;
+  workouts: workout[];
 };
 
 export default ProfileProps;

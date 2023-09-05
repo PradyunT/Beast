@@ -59,7 +59,7 @@ interface Workout {
 
 const gymLat = 33.212060808618546;
 const gymLong = -97.15406761440391;
-const radius = 1; // FIXME
+const radius = 1000; // FIXME
 
 // For plain text input
 const formSchema = z.object({
@@ -84,7 +84,7 @@ const Track = () => {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
-  const [trackMode, setTrackMode] = useState(true); // FIXME
+  const [trackMode, setTrackMode] = useState(false);
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -104,54 +104,34 @@ const Track = () => {
     };
 
     const lines: Array<string> = workoutText.split("\n");
-    const exercises: Exercise[] = [
-      {
-        name: "",
-        sets: [
-          {
-            number: 0,
-            reps: 0,
-            weight: 0,
-          },
-        ],
-      },
-    ];
-    let currentExercise: Exercise | null = { name: "", sets: [] };
-
+    const exercises: Exercise[] = [];
+    let currentExercise: Exercise | null = null;
     workout.name = lines[0];
 
-    for (let i = 0; i < lines.length; i++) {
+    for (let i = 2; i < lines.length; i++) {
       // Check if the line contains "Set: "
       const regex = /(Set )\w/;
       const setRegex = /(\d+(?:\.\d+)?) lbs x (\d+)/;
-      // If the line contains "Set: "
+
       if (regex.test(lines[i])) {
-        if (!currentExercise) {
+        // If the line contains "Set: "
+        if (currentExercise === null) {
           // If there is not currently an exercise
           // Initialize exercise and add exercise name from the previous line
           currentExercise = { name: "", sets: [] };
           currentExercise.name = lines[i - 1];
-          // Initialize set and add the first set
-          const match = lines[i].match(setRegex);
-          currentExercise.sets.push({
-            number: currentExercise.sets.length + 1,
-            weight: parseFloat(match?.[1] || "0"), // Parse as float
-            reps: parseInt(match?.[2] || "0"), // Parse as integer
-          });
-        } else {
-          // If there is currently an exercise
-          // Add set
-          const match = lines[i].match(setRegex);
-          currentExercise.sets.push({
-            number: currentExercise.sets.length + 1,
-            weight: parseFloat(match?.[1] || "0"), // Parse as float
-            reps: parseInt(match?.[2] || "0"), // Parse as integer
-          });
         }
+        // Initialize set and add the first set
+        const match = lines[i].match(setRegex);
+        currentExercise.sets.push({
+          number: currentExercise.sets.length + 1,
+          weight: parseFloat(match?.[1] || "0"),
+          reps: parseInt(match?.[2] || "0"),
+        });
       }
 
       // If the line is blank and there is a current exercise
-      if (lines[i] === "" && currentExercise) {
+      if (lines[i] === "" && currentExercise !== null) {
         // push currentExercise into exercises and reset currentExercise
         exercises.push(currentExercise);
         currentExercise = null;

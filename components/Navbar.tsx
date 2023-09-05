@@ -23,19 +23,33 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 
-import { Menu } from "lucide-react";
+import { LogOut, Menu } from "lucide-react";
 import Image from "next/image";
 import LogoSrc from "@/public/logo.svg";
 import { signIn, signOut, useSession } from "next-auth/react";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { X } from "lucide-react";
 
 const Navbar = () => {
   const { data: session } = useSession();
+  const [open, setOpen] = useState(false);
+  const [loggingIn, setLoggingIn] = useState(false);
+  const pathname = usePathname();
+
   const handleSignIn = async () => {
+    setLoggingIn(true);
     await signIn("google");
   };
+
   const handleSignOut = async () => {
     await signOut();
   };
+
+  useEffect(() => {
+    setOpen(false);
+  }, [pathname]);
+
   return (
     // Desktop navigation
     <>
@@ -85,9 +99,12 @@ const Navbar = () => {
               </NavigationMenuItem>
             ) : (
               <NavigationMenuItem>
-                <button onClick={handleSignIn}>
+                <button
+                  onClick={handleSignIn}
+                  disabled={loggingIn}
+                  className={`${loggingIn && "text-gray-600"}`}>
                   <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                    Login
+                    {loggingIn ? "Logging In..." : "Login"}
                   </NavigationMenuLink>
                 </button>
               </NavigationMenuItem>
@@ -97,24 +114,28 @@ const Navbar = () => {
       </div>
       {/* Mobile navigation */}
       <div className="flex sm:hidden">
-        <Sheet>
-          <SheetTrigger className="mt-8 ml-10">
+        <Sheet open={open}>
+          <SheetTrigger onClick={() => setOpen(true)} className="mt-8 ml-10">
             <Menu />
           </SheetTrigger>
-          <SheetContent side="top">
+          <SheetContent side="top" onInteractOutside={() => setOpen(false)}>
             <SheetHeader className="text-left">
+              <X
+                className={`absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 ${
+                  open ? "data-open:bg-secondary" : ""
+                }`}
+                onClick={() => setOpen(false)}
+              />
               <SheetTitle className="mb-2 text-2xl">Menu</SheetTitle>
               <SheetDescription className="flex-col flex text-lg font-semibold gap-4 text-black underline underline-offset-4">
-                <SheetClose>
-                  <Link href="/profile">Guides</Link>
-                </SheetClose>
-                <Link href="/profile">Track Workout</Link>
-                <Link href="/profile">Leaderboard</Link>
+                <Link href="/guides">Guides</Link>
+                <Link href="/track">Track Workout</Link>
+                <Link href="/leaderboard">Leaderboard</Link>
                 <Link href="/profile">Profile</Link>
                 {session ? (
-                  <Link href="/profile">Logout</Link>
+                  <h1 onClick={handleSignOut}>Logout</h1>
                 ) : (
-                  <Link href="/profile">Login</Link>
+                  <h1 onClick={handleSignIn}>Login</h1>
                 )}
               </SheetDescription>
             </SheetHeader>

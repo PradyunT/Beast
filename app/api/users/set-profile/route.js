@@ -2,28 +2,13 @@ import { connectToDB } from "@/utils/database.js";
 import User from "@/models/user";
 
 export const POST = async (req, res) => {
-  const {
-    userId,
-    displayName,
-    feet,
-    inches,
-    goalWeight,
-    startingWeight,
-    weight,
-    phase,
-  } = await req.json();
+  const { userId, displayName } = await req.json();
   try {
     await connectToDB();
     const user = await User.findByIdAndUpdate(
       userId,
       {
         displayName,
-        "stats.height.feet": feet,
-        "stats.height.inches": inches,
-        "goals.goalWeight": goalWeight,
-        "goals.startingWeight": startingWeight,
-        "stats.weight": weight,
-        "goals.phase": phase,
         initialized: true,
       },
       { new: true } // To get the updated document
