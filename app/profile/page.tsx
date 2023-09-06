@@ -261,12 +261,13 @@ const Profile = () => {
                             <>
                               {profile.goals.map((goal, i) => {
                                 return (
-                                  <div className="w-[100%] pr-4 py-2 sm:w-1/3">
+                                  <div
+                                    className="w-[100%] pr-4 py-2 sm:w-1/3"
+                                    key={i}>
                                     <GoalCard
                                       onDelete={getProfile}
                                       setUpdateGoal={setUpdateGoal}
                                       goal={goal}
-                                      key={i}
                                     />
                                   </div>
                                 );
@@ -274,8 +275,8 @@ const Profile = () => {
                             </>
                           ) : (
                             <p>
-                              You haven't set any goals yet. <br />
-                              Press "create goal" and set some goals.
+                              You haven&apos;t set any goals yet. <br />
+                              Press &quot;create goal&quot; and set some goals.
                             </p>
                           )}
                         </div>
@@ -294,7 +295,7 @@ const Profile = () => {
                 ) : (
                   <>
                     <h1 className="text-md font-semibold">
-                      Your profile hasn't been initialized yet. <br />
+                      Your profile hasn&apos;t been initialized yet. <br />
                       Initialize your profile below.
                     </h1>
                   </>
