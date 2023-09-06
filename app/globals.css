@@ -92,6 +92,18 @@
   @apply text-4xl font-bold;
 }
 
+.subheading {
+  @apply text-gray-500;
+}
+
 .header-link {
   @apply hover:text-blue-500 text-black transition-colors cursor-pointer;
+}
+
+.link {
+  @apply hover:text-blue-500 underline;
+}
+
+.profile-content {
+  @apply text-lg;
 }

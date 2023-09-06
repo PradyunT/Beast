@@ -14,20 +14,47 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { user } from "@/types/user";
 
 const Leaderboard = () => {
   const [users, setUsers] = useState<ProfileProps[] | null>(null);
+
   const getUsers = async () => {
     const data = await fetch("/api/users/getusers", {
       method: "GET",
     });
     const users = await data.json();
-    console.log(users);
-    // Sort users by the number of workouts (in descending order)
-    const sortedUsers = users.sort(
-      (a: ProfileProps, b: ProfileProps) =>
-        b.workouts.length - a.workouts.length
+
+    // Filter users by whether or not they have a consistency goal
+    const usersWithConsistencyGoal = users.filter((user: user) =>
+      user.goals.some((goal) => goal.type === "consistency")
     );
+
+    const sortedUsers = usersWithConsistencyGoal.sort(
+      (a: ProfileProps, b: ProfileProps) => {
+        // Calculate progress for each user
+        const progressA =
+          a.goals.find((goal) => goal.type === "consistency")?.progress || 0;
+        const progressB =
+          b.goals.find((goal) => goal.type === "consistency")?.progress || 0;
+
+        // Calculate frequency for each user
+        const frequencyA =
+          a.goals.find((goal) => goal.type === "consistency")?.consistency
+            .frequency || 0;
+        const frequencyB =
+          b.goals.find((goal) => goal.type === "consistency")?.consistency
+            .frequency || 0;
+
+        // Sort in descending order by progress, prioritizing higher progress
+        if (progressA === progressB) {
+          return frequencyB - frequencyA; // Use frequency as a tiebreaker if progress is the same
+        } else {
+          return progressB - progressA; // Sort by progress first, then frequency
+        }
+      }
+    );
+
     setUsers(sortedUsers);
   };
 
@@ -40,14 +67,16 @@ const Leaderboard = () => {
       {!users ? (
         <Loader />
       ) : (
-        <div>
+        <section id="leaderboard">
+          <h1 className="heading mb-4">Leaderboard</h1>
           <Table>
-            <TableCaption>The leaderboard for going to the gym</TableCaption>
+            <TableCaption>The consistency leaderboard</TableCaption>
             <TableHeader>
               <TableRow>
                 <TableHead className="w-[100px]">Avatar</TableHead>
                 <TableHead className="">Name</TableHead>
                 <TableHead>Tags</TableHead>
+                <TableHead>Consistency</TableHead>
                 <TableHead># of Workouts</TableHead>
                 <TableHead>Rank</TableHead>
               </TableRow>
@@ -69,6 +98,14 @@ const Leaderboard = () => {
                       <Badge key={tag._id}>{tag.tag}</Badge>
                     ))}
                   </TableCell>
+
+                  <TableCell>
+                    {(
+                      (user.goals.find((goal) => goal.type === "consistency")
+                        ?.progress || 0) * 100
+                    ).toFixed(0)}
+                    %
+                  </TableCell>
                   <TableCell>
                     {user.workouts ? user.workouts.length : 0}
                   </TableCell>
@@ -77,9 +114,10 @@ const Leaderboard = () => {
               ))}
             </TableBody>
           </Table>
-        </div>
+        </section>
       )}
     </>
   );
 };
+
 export default Leaderboard;

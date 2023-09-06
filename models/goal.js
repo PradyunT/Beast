@@ -14,10 +14,7 @@ const goalSchema = new Schema({
   },
   consistency: {
     frequency: Number,
-    weekLog: {
-      firstWeek: { date: Date, logs: Number },
-      weeks: [{ date: Date, logs: Number }],
-    },
+    weekLog: [{ date: Date, logs: Number }],
   },
   weight: {
     phase: {

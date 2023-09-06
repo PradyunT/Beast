@@ -1,0 +1,16 @@
+{
+  "short_name": "BEAST",
+  "name": "BEAST",
+  "description": "Official website of TAMS BEAST",
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#000000",
+  "background_color": "#ffffff",
+  "icons": [
+    {
+      "src": "icon.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    }
+  ]
+}

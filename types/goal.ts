@@ -5,8 +5,7 @@ type goal = {
   progress: number;
   consistency: {
     frequency: number;
-    weekLog: { firstWeek: { date: Date; logs: Number } };
-    weeks: { date: Date; logs: Number }[];
+    weekLog: { date: Date; logs: number }[];
   };
   weight: {
     phase: string;
@@ -16,23 +15,23 @@ type goal = {
   };
   strength: {
     exercise: string;
-    startingWeight: Number;
-    currentWeight: Number;
-    goalWeight: Number;
-    startingReps: Number;
-    currentReps: Number;
-    goalReps: Number;
+    startingWeight: number;
+    currentWeight: number;
+    goalWeight: number;
+    startingReps: number;
+    currentReps: number;
+    goalReps: number;
   };
   distanceCardio: {
     cardioType: string;
-    startingDistance: Number;
-    startingTime: Number;
-    currentDistance: Number;
-    currentTime: Number;
-    goalDistance: Number;
-    goalTime: Number;
-    staticTime: Number;
-    staticDistance: Number;
+    startingDistance: number;
+    startingTime: number;
+    currentDistance: number;
+    currentTime: number;
+    goalDistance: number;
+    goalTime: number;
+    staticTime: number;
+    staticDistance: number;
   };
 };
 

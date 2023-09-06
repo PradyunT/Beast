@@ -36,6 +36,7 @@ import Loader from "@/components/Loader";
 import AuthenticationMessage from "@/components/AuthenticationMessage";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import goal from "@/types/goal";
 
 // import type Exercise from "@/types/exercise";
 // import type Workout from "@/types/workout";
@@ -157,12 +158,42 @@ const Track = () => {
 
     if (res.status === 200) {
       toast({
-        title: "Workout submitted",
+        title: "Workout submitted ✅",
         description: "Your workout has been tracked",
       });
+      // Check if user has a consistency goal
+      const res = await fetch(`/api/users/getuser/${session?.user.id}`, {
+        method: "GET",
+      });
+      const user = await res.json();
+      const consistencyGoal = user.goals.find(
+        (goal: goal) => goal.type === "consistency"
+      );
+      if (consistencyGoal) {
+        // If user has consistency goal
+        const res = await fetch("/api/goals/update-goal", {
+          method: "POST",
+          body: JSON.stringify({
+            goalId: consistencyGoal._id,
+          }),
+        });
+        if (res.status === 200) {
+          toast({
+            title: "Successfully updated consistency goal ✅",
+            description:
+              "Your workout has been tracked toward your consistency goal",
+          });
+        } else if (res.status === 500) {
+          toast({
+            title: "Server error while trying to update consistency goal ❌",
+            description:
+              "There was a server error while trying to update your consistency goal",
+          });
+        }
+      }
     } else if (res.status === 500) {
       toast({
-        title: "Error",
+        title: "Error ❌",
         description: "Server error",
       });
     }
@@ -294,6 +325,7 @@ const Track = () => {
                           <FormLabel>Workout Text</FormLabel>
                           <FormControl>
                             <Textarea
+                              className="h-40"
                               placeholder="Workout Text Here"
                               {...field}
                             />
@@ -302,7 +334,7 @@ const Track = () => {
                             Input the text generated from your workout tracker
                             <Dialog>
                               <DialogTrigger>
-                                <span className="ml-1 underline text-gray-600 hover:text-blue-500 transition-colors">
+                                <span className="ml-1 link text-gray-600 transition-colors">
                                   Example
                                 </span>
                               </DialogTrigger>

@@ -51,8 +51,8 @@ const Navbar = () => {
   }, [pathname]);
 
   return (
-    // Desktop navigation
     <>
+      {/* Desktop navigation */}
       <div className="hidden sm:flex">
         <NavigationMenu className="h-16 mx-16 bg-orange">
           <div className="font-bold text-2xl mr-6">
@@ -113,7 +113,12 @@ const Navbar = () => {
         </NavigationMenu>
       </div>
       {/* Mobile navigation */}
-      <div className="flex sm:hidden">
+      <div className="sm:hidden">
+        <Image
+          src={LogoSrc}
+          alt="Beast logo mobile"
+          className="h-12 absolute top-5 left-[35vw] w-auto "
+        />
         <Sheet open={open}>
           <SheetTrigger onClick={() => setOpen(true)} className="mt-8 ml-10">
             <Menu />

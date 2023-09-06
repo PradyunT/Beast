@@ -43,7 +43,7 @@ const staticDistanceFormSchema = z.object({
   date: z.date(),
 });
 
-const CardioForm = () => {
+const CardioForm = ({ goBack }: { goBack: () => void }) => {
   const [submitting, setSubmitting] = useState(false);
   const { toast } = useToast();
   const { data: session } = useSession();
@@ -249,6 +249,9 @@ const CardioForm = () => {
             <Button type="submit" disabled={submitting}>
               {submitting ? "Submitting" : "Submit"}
             </Button>
+            <Button variant="secondary" onClick={goBack} className="ml-2">
+              Go Back
+            </Button>
           </form>
         </Form>
       </TabsContent>
@@ -376,6 +379,9 @@ const CardioForm = () => {
             />
             <Button type="submit" disabled={submitting}>
               {submitting ? "Submitting" : "Submit"}
+            </Button>
+            <Button variant="secondary" onClick={goBack} className="ml-2">
+              Go Back
             </Button>
           </form>
         </Form>

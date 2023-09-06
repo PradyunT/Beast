@@ -30,7 +30,7 @@ const formSchema = z.object({
   date: z.date(),
 });
 
-const ConsistencyForm = () => {
+const ConsistencyForm = ({ goBack }: { goBack: () => void }) => {
   const { data: session } = useSession();
   const { toast } = useToast();
   const form = useForm<z.infer<typeof formSchema>>({
@@ -129,6 +129,9 @@ const ConsistencyForm = () => {
         />
         <Button type="submit" disabled={submitting}>
           {submitting ? "Submitting" : "Submit"}
+        </Button>
+        <Button variant="secondary" onClick={goBack} className="ml-2">
+          Go Back
         </Button>
       </form>
     </Form>

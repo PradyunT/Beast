@@ -41,6 +41,8 @@ import WeightForm from "@/components/forms/WeightForm";
 import StrengthForm from "@/components/forms/StrengthForm";
 import CardioForm from "@/components/forms/CardioForm";
 import GoalCard from "@/components/GoalCard";
+import type goal from "@/types/goal";
+import UpdateGoal from "@/components/UpdateGoal";
 
 const formSchema = z.object({
   displayName: z
@@ -58,6 +60,8 @@ const Profile = () => {
   const [submitting, setSubmitting] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [createGoalMode, setCreateGoalMode] = useState(false);
+  const [updateGoal, setUpdateGoal] = useState<goal | false>(false);
+
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -114,162 +118,190 @@ const Profile = () => {
         <Loader />
       ) : !session ? (
         <AuthenticationMessage to="access your profile" />
-      ) : editMode ? (
-        <>
-          <Card>
-            <CardHeader>
-              <CardTitle>Edit Profile</CardTitle>
-              <CardDescription>
-                Edit your profile and save your changes
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Form {...form}>
-                <form
-                  onSubmit={form.handleSubmit(onSubmit)}
-                  className="space-y-4">
-                  <h1 className="text-xl font-bold">Display Settings</h1>
-                  <FormField
-                    control={form.control}
-                    name="displayName"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Display Name</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Display Name" {...field} />
-                        </FormControl>
-                        <FormDescription>
-                          This is your public display name. Make sure it&apos;s
-                          identifiable.
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <Button type="submit" disabled={submitting}>
-                    {submitting ? "Submitting" : "Submit"}
-                  </Button>
-                </form>
-              </Form>
-            </CardContent>
-          </Card>
-        </>
-      ) : createGoalMode ? (
-        <>
-          <Card>
-            <CardHeader>
-              <CardTitle>Create Goal</CardTitle>
-              <CardDescription>
-                Create and set your fitness goal
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Tabs defaultValue="consistency" className="w-[400px]">
-                <TabsList className="mb-2">
-                  <TabsTrigger value="consistency">Consistency</TabsTrigger>
-                  <TabsTrigger value="weight">Weight</TabsTrigger>
-                  <TabsTrigger value="lift">Lift</TabsTrigger>
-                  <TabsTrigger value="cardio">Cardio</TabsTrigger>
-                  <TabsTrigger value="calisthenics">Calisthenics</TabsTrigger>
-                </TabsList>
-                <TabsContent value="consistency">
-                  <h1 className="text-xl font-bold mb-2">
-                    Set goal for consistency
-                  </h1>
-                  <ConsistencyForm />
-                </TabsContent>
-                <TabsContent value="weight">
-                  <h1 className="text-xl font-bold mb-2">
-                    Set goal for body weight
-                  </h1>
-                  <WeightForm />
-                </TabsContent>
-                <TabsContent value="lift">
-                  <h1 className="text-xl font-bold mb-2">
-                    Set goal for lifting strength
-                  </h1>
-                  <StrengthForm />
-                </TabsContent>
-                <TabsContent value="cardio">
-                  <h1 className="text-xl font-bold mb-2">
-                    Set goal for distance cardio
-                  </h1>
-                  <CardioForm />
-                </TabsContent>
-                <TabsContent value="calisthenics">
-                  Set goal for calisthenics WIP 🛠
-                </TabsContent>
-              </Tabs>
-            </CardContent>
-            <CardFooter>
-              <p>
-                Done setting goals?{" "}
-                <Button
-                  variant="secondary"
-                  onClick={() => setCreateGoalMode(false)}
-                  className="ml-2">
-                  Go Back
-                </Button>
-              </p>
-            </CardFooter>
-          </Card>
-        </>
       ) : (
         <>
-          <Card className="w-fit">
-            <CardHeader>
-              <CardTitle>Your Profile</CardTitle>
-              <CardDescription>View and edit your profile</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {profile?.initialized ? (
-                <>
-                  <h1 className="text-lg font-semibold">Display</h1>
-                  <p> Display Name: {profile.displayName}</p>
-                  <h1 className="text-xl font-semibold my-2">Goals</h1>
-                  {profile?.goals ? (
-                    <>
-                      {profile.goals.map((goal, i) => {
-                        // if (goal.type === "consistency") {
-                        return <GoalCard goal={goal} key={i}/>;
-                        // } else if (goal.type === "weight") {
-                        //   return <>Render weight goal</>;
-                        // } else if (goal.type === "strength") {
-                        //   return <>Render strength goal</>;
-                        // } else if (goal.type === "distanceCardio") {
-                        //   return <>Render distance cardio goal</>;
-                        // }
-                      })}
-                    </>
-                  ) : (
-                    <p>
-                      You haven't set any goals yet. <br />
-                      Press "create goal" and set some goals.
-                    </p>
-                  )}
-                </>
-              ) : (
-                <>
-                  <h1 className="text-md font-semibold">
-                    Your profile hasn't been initialized yet. <br />
-                    Initialize your profile below.
-                  </h1>
-                </>
-              )}
-            </CardContent>
-            <CardFooter>
-              <Button onClick={() => setEditMode(true)}>
-                {profile?.initialized ? "Edit Profile" : "Initialize"}
-              </Button>
-              <Button
-                onClick={() => setCreateGoalMode(true)}
-                disabled={!profile?.initialized}
-                variant={"secondary"}
-                className="ml-2 hover:bg-gray-200">
-                Create Goal
-              </Button>
-            </CardFooter>
-          </Card>
+          {" "}
+          <h1 className="heading">Your Profile</h1>
+          <h2 className="text-xl text-gray-500 mt-1">
+            View and edit your Profile and Goals
+          </h2>{" "}
+          {editMode ? (
+            // Edit Mode
+            <>
+              <Card className="mt-4">
+                <CardHeader>
+                  <CardTitle>Edit Profile</CardTitle>
+                  <CardDescription>
+                    Edit your profile and save your changes
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Form {...form}>
+                    <form
+                      onSubmit={form.handleSubmit(onSubmit)}
+                      className="space-y-4">
+                      <h1 className="text-xl font-bold">Display Settings</h1>
+                      <FormField
+                        control={form.control}
+                        name="displayName"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Display Name</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Display Name" {...field} />
+                            </FormControl>
+                            <FormDescription>
+                              This is your public display name. Make sure
+                              it&apos;s identifiable.
+                            </FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <Button type="submit" disabled={submitting}>
+                        {submitting ? "Submitting" : "Submit"}
+                      </Button>
+                      <Button
+                        variant="secondary"
+                        onClick={() => setEditMode(false)}
+                        className="ml-2">
+                        {" "}
+                        Go Back
+                      </Button>
+                    </form>
+                  </Form>
+                </CardContent>
+              </Card>
+            </>
+          ) : createGoalMode ? (
+            // Create Goal Mode
+            <>
+              <Card className="mt-4">
+                <CardHeader>
+                  <CardTitle>Create Goal</CardTitle>
+                  <CardDescription>
+                    Create and set your fitness goal
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Tabs defaultValue="consistency" className="">
+                    <TabsList className="mb-2 text-md sm:text-lg">
+                      <TabsTrigger value="consistency">Consistency</TabsTrigger>
+                      <TabsTrigger value="weight">Weight</TabsTrigger>
+                      <TabsTrigger value="lift">Lift</TabsTrigger>
+                      <TabsTrigger value="cardio">Cardio</TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="consistency">
+                      <h1 className="text-xl font-bold mb-2">
+                        Set goal for consistency
+                      </h1>
+                      <ConsistencyForm
+                        goBack={() => setCreateGoalMode(false)}
+                      />
+                    </TabsContent>
+                    <TabsContent value="weight">
+                      <h1 className="text-xl font-bold mb-2">
+                        Set goal for body weight
+                      </h1>
+                      <WeightForm goBack={() => setCreateGoalMode(false)} />
+                    </TabsContent>
+                    <TabsContent value="lift">
+                      <h1 className="text-xl font-bold mb-2">
+                        Set goal for lifting strength
+                      </h1>
+                      <StrengthForm goBack={() => setCreateGoalMode(false)} />
+                    </TabsContent>
+                    <TabsContent value="cardio">
+                      <h1 className="text-xl font-bold mb-2">
+                        Set goal for distance cardio
+                      </h1>
+                      <CardioForm goBack={() => setCreateGoalMode(false)} />
+                    </TabsContent>
+                  </Tabs>
+                </CardContent>
+              </Card>
+            </>
+          ) : updateGoal ? (
+            // Update Goal Mode
+            <>
+              <UpdateGoal
+                goal={updateGoal}
+                setUpdateGoal={setUpdateGoal}
+                getProfile={getProfile}
+              />
+            </>
+          ) : (
+            // Default Mode
+            <>
+              <div className="mt-4">
+                {profile?.initialized ? (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Profile</CardTitle>
+                        <CardDescription>Card Description</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <p> Display Name: {profile.displayName}</p>
+                      </CardContent>
+                      <CardFooter>
+                        <Button onClick={() => setEditMode(true)}>
+                          {profile?.initialized ? "Edit Profile" : "Initialize"}
+                        </Button>
+                      </CardFooter>
+                    </Card>
+                    <Card className="mt-4">
+                      <CardHeader>
+                        <CardTitle>Goals</CardTitle>
+                        <CardDescription>Card Description</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="flex flex-row flex-wrap">
+                          {profile.goals.length !== 0 ? (
+                            <>
+                              {profile.goals.map((goal, i) => {
+                                return (
+                                  <div className="w-[100%] pr-4 py-2 sm:w-1/3">
+                                    <GoalCard
+                                      onDelete={getProfile}
+                                      setUpdateGoal={setUpdateGoal}
+                                      goal={goal}
+                                      key={i}
+                                    />
+                                  </div>
+                                );
+                              })}
+                            </>
+                          ) : (
+                            <p>
+                              You haven't set any goals yet. <br />
+                              Press "create goal" and set some goals.
+                            </p>
+                          )}
+                        </div>
+                      </CardContent>
+                      <CardFooter>
+                        <Button
+                          onClick={() => setCreateGoalMode(true)}
+                          disabled={!profile?.initialized}
+                          variant="secondary"
+                          className="ml-2 hover:bg-gray-200">
+                          Create Goal
+                        </Button>
+                      </CardFooter>
+                    </Card>
+                  </>
+                ) : (
+                  <>
+                    <h1 className="text-md font-semibold">
+                      Your profile hasn't been initialized yet. <br />
+                      Initialize your profile below.
+                    </h1>
+                  </>
+                )}
+              </div>
+            </>
+          )}{" "}
         </>
       )}
     </section>

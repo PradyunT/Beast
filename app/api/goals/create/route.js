@@ -12,14 +12,14 @@ export const POST = async (req) => {
     if (type === "consistency") {
       const { frequency } = data;
       newGoal = await new Goal({
-        consistency: { frequency },
+        consistency: { frequency, weekLog: [{ date: new Date(), logs: 0 }] },
         date,
         type,
       });
     } else if (type === "weight") {
-      const { startingWeight, goalWeight } = data;
+      const { startingWeight, goalWeight, phase } = data;
       newGoal = await new Goal({
-        weight: { startingWeight, goalWeight },
+        weight: { startingWeight, goalWeight, phase },
         date,
         type,
       });
