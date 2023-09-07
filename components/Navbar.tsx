@@ -59,8 +59,8 @@ const Navbar = () => {
   return (
     <>
       {/* Desktop navigation */}
-      <div className="hidden sm:flex">
-        <NavigationMenu className="h-16 mx-16 bg-orange">
+      <div className="hidden sm:flex bg-white shadow-border">
+        <NavigationMenu className="h-16 mx-16">
           <div className="font-bold text-2xl mr-6">
             <Link href="/">
               <Image src={LogoSrc} alt="BEAST Logo" width={90} />
@@ -133,7 +133,7 @@ const Navbar = () => {
         </NavigationMenu>
       </div>
       {/* Mobile navigation */}
-      <div className="sm:hidden">
+      <div className="bg-white shadow-border pb-5 sm:hidden">
         <Image
           src={LogoSrc}
           alt="Beast logo mobile"

@@ -1,14 +1,18 @@
 const Footer = () => {
   return (
-    <section className="footer ">
-      <div className="w-full h-16 text-center mt-8">
-        Built by Pradyun Tandra 💪
-        <br />
-        <a
-          href="mailto:pradyun.tandra@gmail.com"
-          className="text-gray-700 link">
-          Send feedback
-        </a>
+    <section id="footer">
+      <div className="w-full h-24 mt-8 bg-white flex justify-center items-center">
+        <div className="text-center">
+          <h1>Built by Pradyun Tandra 💪</h1>
+          <h1>
+            Beta version{" "}
+            <a
+              href="mailto:pradyun.tandra@gmail.com"
+              className="text-gray-700 link">
+              Send feedback
+            </a>
+          </h1>
+        </div>
       </div>
     </section>
   );

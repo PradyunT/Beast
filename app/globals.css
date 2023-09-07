@@ -107,3 +107,7 @@
 .profile-content {
   @apply text-lg;
 }
+
+.text-montserrat {
+  font-family: var(--font-montserrat);
+}

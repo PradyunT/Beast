@@ -68,28 +68,36 @@ const formSchema = z.object({
 });
 
 // For tracking in the website
-/*
-const formSchema2 = z.object({
-  exercise: z.object({
-    name: z.string(),
-    sets: z.object({
-      reps: z.number(),
-      weight: z.number(),
-    }),
-  }),
+const siteTrackingSchema = z.object({
+  name: z.string(),
+  exercises: z.array(
+    z.object({
+      name: z.string(),
+      sets: z.array(
+        z.object({
+          number: z.number(),
+          reps: z.number(),
+          weight: z.number(),
+        })
+      ),
+    })
+  ),
 });
-*/
 
 const Track = () => {
   const { data: session, status } = useSession();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
-  const [trackMode, setTrackMode] = useState(false);
+  const [trackMode, setTrackMode] = useState<number | null>(1); // FIXME
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
+  });
+
+  const siteTrackingForm = useForm<z.infer<typeof siteTrackingSchema>>({
+    resolver: zodResolver(siteTrackingSchema),
   });
 
   // Function to parse workout text input
@@ -247,7 +255,7 @@ const Track = () => {
             });
           } else if (res.status === 200) {
             // If the user has not already tracked a workout today: good to go
-            setTrackMode(true);
+            setTrackMode(2);
           }
         } else {
           // If the user is out of range of Pohl Rec Center
@@ -311,6 +319,42 @@ const Track = () => {
                 </Button>
                 <h1 className="text-red-600 mt-2">{error}</h1>
               </>
+            ) : trackMode == 1 ? (
+              // In site tracking
+              <>
+                {/* <Form {...siteTrackingForm}>
+                  <form
+                    onSubmit={siteTrackingForm.handleSubmit(onSubmit)}
+                    className="space-y-8">
+                    <FormField
+                      control={siteTrackingForm.control}
+                      name="name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Workout Text</FormLabel>
+                          <FormControl>
+                            <Input placeholder="PPL - PUSH" {...field} />
+                          </FormControl>
+                          <FormDescription>
+                            The name of your workout
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <Button className="mt-4" type="submit">
+                      Finish Workout
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      className="ml-2"
+                      type="button"
+                      onClick={() => setTrackMode(2)}>
+                      Switch Type
+                    </Button>
+                  </form>
+                </Form> */}
+              </>
             ) : (
               <>
                 <Form {...form}>
@@ -373,6 +417,13 @@ const Track = () => {
                     <Button className="mt-4" type="submit">
                       Finish Workout
                     </Button>
+                    {/* <Button
+                      variant="secondary"
+                      className="ml-2"
+                      type="button"
+                      onClick={() => setTrackMode(1)}>
+                      Switch Type
+                    </Button> */}
                   </form>
                 </Form>
               </>

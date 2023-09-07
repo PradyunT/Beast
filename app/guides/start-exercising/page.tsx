@@ -12,17 +12,16 @@ const StartExercising = () => {
         <h1 className="mt-0.5 header-link">Intro</h1>
         <h1 className="mt-0.5 header-link">Who this is for</h1>
       </div>
-      <h1 className="text-2xl font-semibold mt-4">Intro</h1>
-      <p className="leading-6">
+      <h1 className="text-2xl font-semibold mt-4">COMING SOON 🛠️</h1>
+      {/*<h1 className="text-2xl font-semibold mt-4">Intro</h1>
+       <p className="leading-6">
         Hey Beasts! 👋 <br />
         This article will teach you everything you need to know to get started
         at the gym. We poured our heart and soul into this so we hope you find
         this valuable!
-      </p>
-      <h1 className="text-2xl font-semibold mt-4">
-        Why Should You go to the Gym?
-      </h1>
-      <p className="leading-6">
+      </p> */}
+      {/* <h1 className="text-2xl font-semibold mt-4">Intro</h1> */}
+      {/* <p className="leading-6">
         So, why should you go to the gym? In our experience, the benefits are
         twofold; going to the gym will not only improve your physical health,
         but mental health as well. <br className="h-12" />
@@ -33,7 +32,7 @@ const StartExercising = () => {
         health, going to the gym will help you build discipline, get better
         sleep, manage your stress, improve your brain function, and boost your
         confidence.
-      </p>
+      </p> */}
     </div>
   );
 };
