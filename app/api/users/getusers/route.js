@@ -1,6 +1,8 @@
 import { connectToDB } from "@/utils/database";
 import User from "@/models/user";
 import Goal from "@/models/goal";
+import Workouts from "@/models/workout";
+
 export const GET = async (req, res) => {
   try {
     await connectToDB();

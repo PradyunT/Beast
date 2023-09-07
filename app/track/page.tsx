@@ -89,7 +89,7 @@ const Track = () => {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
-  const [trackMode, setTrackMode] = useState<number | null>(1); // FIXME
+  const [trackMode, setTrackMode] = useState<number | null>(null);
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({

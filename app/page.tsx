@@ -42,9 +42,11 @@ export default function Home() {
           </h1>
         </div>
         <Button
-          className="bg-white text-xl font-semibold rounded-none text-black w-36 h-12 hover:bg-gray-300"
+          className={`bg-white text-xl font-semibold rounded-none text-black w-36 h-12 hover:bg-gray-300 ${
+            session && "w-40"
+          }`}
           onClick={() => signIn("google")}>
-          {session ? "go to profile." : "start now."}
+          {session ? "go to profile." : "join now."}
         </Button>
       </div>
       {/* <div>
