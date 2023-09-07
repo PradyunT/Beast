@@ -8,6 +8,7 @@ import invertedLogoSrc from "@/public/logoInverted.svg";
 import Image from "next/image";
 import { Montserrat } from "next/font/google";
 import { signIn, useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 const montserrat = Montserrat({
   subsets: ["latin"],
   variable: "--font-montserrat",
@@ -15,6 +16,7 @@ const montserrat = Montserrat({
 
 export default function Home() {
   const { data: session } = useSession();
+  const router = useRouter();
   return (
     <main className="text-white">
       <video
@@ -45,7 +47,9 @@ export default function Home() {
           className={`bg-white text-xl font-semibold rounded-none text-black w-36 h-12 hover:bg-gray-300 ${
             session && "w-40"
           }`}
-          onClick={() => signIn("google")}>
+          onClick={
+            session ? () => router.push("/profile") : () => signIn("google")
+          }>
           {session ? "go to profile." : "join now."}
         </Button>
       </div>

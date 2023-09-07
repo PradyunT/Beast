@@ -60,7 +60,7 @@ interface Workout {
 
 const gymLat = 33.212060808618546;
 const gymLong = -97.15406761440391;
-const radius = 0.5;
+const radius: number = parseInt(process.env.radius || "1", 10);
 
 // For plain text input
 const formSchema = z.object({
@@ -152,6 +152,7 @@ const Track = () => {
   }
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    console.log(radius);
     setSubmitting(true);
     // Parse the workout text
     const parsedWorkout = parseWorkoutText(values.workoutText);

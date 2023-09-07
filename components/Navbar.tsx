@@ -134,11 +134,13 @@ const Navbar = () => {
       </div>
       {/* Mobile navigation */}
       <div className="bg-white shadow-border pb-5 sm:hidden">
-        <Image
-          src={LogoSrc}
-          alt="Beast logo mobile"
-          className="h-12 absolute top-5 left-[35vw] w-auto "
-        />
+        <Link href="/">
+          <Image
+            src={LogoSrc}
+            alt="Beast logo mobile"
+            className="h-12 absolute top-5 left-[35vw] w-auto"
+          />
+        </Link>
         <Sheet open={open}>
           <SheetTrigger onClick={() => setOpen(true)} className="mt-8 ml-10">
             <Menu />
