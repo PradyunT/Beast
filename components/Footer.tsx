@@ -5,7 +5,7 @@ const Footer = () => {
         Built by Pradyun Tandra 💪
         <br />
         <a
-          href="mailto@pradyun.tandra@gmail.com"
+          href="mailto:pradyun.tandra@gmail.com"
           className="text-gray-700 link">
           Send feedback
         </a>

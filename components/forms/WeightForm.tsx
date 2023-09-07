@@ -103,7 +103,6 @@ const WeightForm = ({ goBack }: { goBack: () => void }) => {
             </FormItem>
           )}
         />
-
         <FormField
           control={form.control}
           name="startingWeight"
@@ -113,7 +112,7 @@ const WeightForm = ({ goBack }: { goBack: () => void }) => {
               <FormControl>
                 <Input
                   type="number"
-                  placeholder="150"
+                  placeholder="Ex. 125, 150"
                   {...field}
                   className="w-1/2"
                 />
@@ -135,7 +134,7 @@ const WeightForm = ({ goBack }: { goBack: () => void }) => {
               <FormControl>
                 <Input
                   type="number"
-                  placeholder="180"
+                  placeholder="Ex. 110, 175"
                   {...field}
                   className="w-1/2"
                 />

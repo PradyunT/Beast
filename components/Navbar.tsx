@@ -22,6 +22,11 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 import { LogOut, Menu } from "lucide-react";
 import Image from "next/image";
@@ -30,6 +35,7 @@ import { signIn, signOut, useSession } from "next-auth/react";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { X } from "lucide-react";
+import { Button } from "./ui/button";
 
 const Navbar = () => {
   const { data: session } = useSession();
@@ -91,9 +97,23 @@ const Navbar = () => {
             </NavigationMenuItem>
             {session ? (
               <NavigationMenuItem>
-                <button onClick={handleSignOut}>
+                <button>
                   <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                    Logout
+                    <Popover>
+                      <PopoverTrigger>Logout</PopoverTrigger>
+                      <PopoverContent>
+                        <div>
+                          <h1 className="flex flex-nowrap">
+                            Are you sure you want to logout?
+                            <Button
+                              onClick={handleSignOut}
+                              className="mt-1 ml-2">
+                              Yes
+                            </Button>
+                          </h1>
+                        </div>
+                      </PopoverContent>
+                    </Popover>
                   </NavigationMenuLink>
                 </button>
               </NavigationMenuItem>
@@ -138,7 +158,21 @@ const Navbar = () => {
                 <Link href="/leaderboard">Leaderboard</Link>
                 <Link href="/profile">Profile</Link>
                 {session ? (
-                  <h1 onClick={handleSignOut}>Logout</h1>
+                  <Popover>
+                    <PopoverTrigger>
+                      <div className="text-left">
+                        <h1>Logout</h1>
+                      </div>
+                    </PopoverTrigger>
+                    <PopoverContent className="flex flex-nowrap -ml-16 mt-2">
+                      <h1>
+                        Are you sure you want to logout?
+                        <Button onClick={handleSignOut} className="mt-1 ml-2">
+                          Yes
+                        </Button>
+                      </h1>
+                    </PopoverContent>
+                  </Popover>
                 ) : (
                   <h1 onClick={handleSignIn}>Login</h1>
                 )}

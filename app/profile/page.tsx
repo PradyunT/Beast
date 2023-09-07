@@ -290,8 +290,7 @@ const Profile = () => {
                         <Button
                           onClick={() => setCreateGoalMode(true)}
                           disabled={!profile?.initialized}
-                          variant="secondary"
-                          className="ml-2 hover:bg-gray-200">
+                          variant="secondary">
                           Create Goal
                         </Button>
                       </CardFooter>
