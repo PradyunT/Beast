@@ -86,8 +86,13 @@ const Profile = () => {
       setSubmitting(false);
       setEditMode(false);
       toast({
-        title: "Submitted successfully",
-        description: "Your data was submitted successfully",
+        title: "Profile created successfully ✅",
+        description: "Your profile was created successfully",
+      });
+    } else if (res.status === 500) {
+      toast({
+        title: "Error while creating profile ❌",
+        description: "There was an error while trying to create your profile",
       });
     }
   };
@@ -246,7 +251,7 @@ const Profile = () => {
                       </CardContent>
                       <CardFooter>
                         <Button onClick={() => setEditMode(true)}>
-                          {profile?.initialized ? "Edit Profile" : "Initialize"}
+                          Edit Profile
                         </Button>
                       </CardFooter>
                     </Card>
@@ -298,6 +303,9 @@ const Profile = () => {
                       Your profile hasn&apos;t been initialized yet. <br />
                       Initialize your profile below.
                     </h1>
+                    <Button onClick={() => setEditMode(true)} className="mt-4">
+                      Initialize
+                    </Button>
                   </>
                 )}
               </div>
