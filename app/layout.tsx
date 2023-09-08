@@ -11,6 +11,7 @@ import Head from "next/head";
 export const metadata = {
   title: "TAMS BEAST",
   description: "The offical website of TAMS BEAST",
+  manifest: "../manifest.json",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
@@ -18,7 +19,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     <html lang="en">
       <Head>
         {" "}
-        <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+        <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#000000" />
       </Head>
       <body className={inter.className}>
