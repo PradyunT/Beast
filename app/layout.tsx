@@ -6,6 +6,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Toaster } from "@/components/ui/toaster";
 import Provider from "@/components/util/Provider";
+import Head from "next/head";
 
 export const metadata = {
   title: "TAMS BEAST",
@@ -15,6 +16,11 @@ export const metadata = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
+      <Head>
+        {" "}
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="theme-color" content="#000000" />
+      </Head>
       <body className={inter.className}>
         <Provider>
           <Toaster />
