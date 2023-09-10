@@ -28,7 +28,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           <div className="max-w-full">
             <Navbar />
           </div>
-          <div className="max-w-full min-h-[85vh] mx-10 mt-8 sm:mx-16">
+          <div className="max-w-full min-h-[85vh] mx-10 mt-8 flex sm:mx-16">
             {children}
           </div>
           <Footer />

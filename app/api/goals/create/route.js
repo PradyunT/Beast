@@ -11,8 +11,18 @@ export const POST = async (req) => {
 
     if (type === "consistency") {
       const { frequency } = data;
+      
+      // Calculate initFrequency based on days until next Sunday
+      const today = new Date();
+      const daysUntilNextSunday = 7 - today.getDay();
+      const initFrequency = Math.floor((frequency * daysUntilNextSunday) / 7);
+
       newGoal = await new Goal({
-        consistency: { frequency, weekLog: [{ date: new Date(), logs: 0 }] },
+        consistency: {
+          frequency,
+          initFrequency, // Set initFrequency
+          weekLog: [{ date: new Date(), logs: 0 }],
+        },
         date,
         type,
       });
