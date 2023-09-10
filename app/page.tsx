@@ -18,7 +18,7 @@ export default function Home() {
   const { data: session } = useSession();
   const router = useRouter();
   return (
-    <main className="text-white">
+    <main className="text-white self-center">
       <video
         autoPlay
         loop
@@ -28,30 +28,35 @@ export default function Home() {
         <source src="/videos/heroVideo.mp4" />
       </video>
       <div className="flex flex-col text-left justify-start">
-        <div className={`${montserrat.className}`}>
+        <div>
           {" "}
-          <h1 className={`text-5xl font-semibold mb-4 sm:text-8xl`}>
-            welcome to{" "}
-          </h1>
-          <Image
-            src={invertedLogoSrc}
-            alt="Inverted Logo"
-            className="w-[20rem] h-auto mb-4 sm:w-[25rem]"
-          />
-          <h1 className="text-3xl font-semibold mb-16">
-            physical fitness. <br />
-            elevated.
-          </h1>
+          <div className={`${montserrat.className}`}>
+            {" "}
+            <h1
+              className={`text-5xl font-semibold mb-4 sm:text-8xl 2xl:text-[9rem]`}>
+              welcome to{" "}
+            </h1>
+            <Image
+              src={invertedLogoSrc}
+              alt="Inverted Logo"
+              className="w-[20rem] h-auto mb-4 sm:w-[25rem] 2xl:w-[30rem]"
+            />
+            <h1 className="text-3xl font-semibold mb-8 2xl:text-4xl">
+              physical fitness. <br />
+              elevated.
+            </h1>
+          </div>
+          <Button
+            variant="secondary"
+            className={`text-xl font-bold rounded-sm w-36 h-12 ${
+              session && "w-40"
+            }`}
+            onClick={
+              session ? () => router.push("/profile") : () => signIn("google")
+            }>
+            {session ? "go to profile." : "join now."}
+          </Button>
         </div>
-        <Button
-          className={`bg-white text-xl font-semibold rounded-none text-black w-36 h-12 hover:bg-gray-300 ${
-            session && "w-40"
-          }`}
-          onClick={
-            session ? () => router.push("/profile") : () => signIn("google")
-          }>
-          {session ? "go to profile." : "join now."}
-        </Button>
       </div>
       {/* <div>
         <h1 className="heading">Welcome to BEAST</h1>

@@ -97,6 +97,11 @@ const Profile = () => {
     }
   };
 
+  const handleGoBackCreateGoal = () => {
+    getProfile();
+    setCreateGoalMode(false);
+  };
+
   const getProfile = async () => {
     try {
       const res = await fetch(`/api/users/getuser/${session?.user?.id}`, {
@@ -118,8 +123,8 @@ const Profile = () => {
   }, [session]);
 
   return (
-    <section className="profile">
-      {loading ? (
+    <section id="profile" className="w-[100%]">
+      {status === "loading" ? (
         <Loader />
       ) : !session ? (
         <AuthenticationMessage to="access your profile" />
@@ -201,26 +206,26 @@ const Profile = () => {
                         Set goal for consistency
                       </h1>
                       <ConsistencyForm
-                        goBack={() => setCreateGoalMode(false)}
+                        goBack={() => handleGoBackCreateGoal()}
                       />
                     </TabsContent>
                     <TabsContent value="weight">
                       <h1 className="text-xl font-bold mb-2">
                         Set goal for body weight
                       </h1>
-                      <WeightForm goBack={() => setCreateGoalMode(false)} />
+                      <WeightForm goBack={() => handleGoBackCreateGoal()} />
                     </TabsContent>
                     <TabsContent value="lift">
                       <h1 className="text-xl font-bold mb-2">
                         Set goal for lifting strength
                       </h1>
-                      <StrengthForm goBack={() => setCreateGoalMode(false)} />
+                      <StrengthForm goBack={() => handleGoBackCreateGoal()} />
                     </TabsContent>
                     <TabsContent value="cardio">
                       <h1 className="text-xl font-bold mb-2">
                         Set goal for distance cardio
                       </h1>
-                      <CardioForm goBack={() => setCreateGoalMode(false)} />
+                      <CardioForm goBack={() => handleGoBackCreateGoal()} />
                     </TabsContent>
                   </Tabs>
                 </CardContent>
@@ -244,7 +249,9 @@ const Profile = () => {
                     <Card>
                       <CardHeader>
                         <CardTitle>Profile</CardTitle>
-                        <CardDescription>Card Description</CardDescription>
+                        <CardDescription>
+                          View and edit your profile here
+                        </CardDescription>
                       </CardHeader>
                       <CardContent>
                         <p> Display Name: {profile.displayName}</p>
@@ -258,17 +265,17 @@ const Profile = () => {
                     <Card className="mt-4">
                       <CardHeader>
                         <CardTitle>Goals</CardTitle>
-                        <CardDescription>Card Description</CardDescription>
+                        <CardDescription>
+                          View and edit your goals here
+                        </CardDescription>
                       </CardHeader>
                       <CardContent>
-                        <div className="flex flex-row flex-wrap">
+                        <div className="flex flex-row justify-between flex-wrap">
                           {profile.goals.length !== 0 ? (
                             <>
                               {profile.goals.map((goal, i) => {
                                 return (
-                                  <div
-                                    className="w-[100%] pr-4 py-2 sm:w-1/3"
-                                    key={i}>
+                                  <div className="w-[100%] sm:w-[32%]" key={i}>
                                     <GoalCard
                                       onDelete={getProfile}
                                       setUpdateGoal={setUpdateGoal}

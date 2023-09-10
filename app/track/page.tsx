@@ -8,7 +8,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useSession } from "next-auth/react";
 import { useToast } from "@/components/ui/use-toast";
 import {
@@ -37,6 +37,7 @@ import AuthenticationMessage from "@/components/AuthenticationMessage";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import goal from "@/types/goal";
+import { PlusIcon } from "lucide-react";
 
 // import type Exercise from "@/types/exercise";
 // import type Workout from "@/types/workout";
@@ -60,7 +61,7 @@ interface Workout {
 
 const gymLat = 33.212060808618546;
 const gymLong = -97.15406761440391;
-const radius: number = parseInt(process.env.radius || "1", 10);
+const radius: number = 1; //FIXME
 
 // For plain text input
 const formSchema = z.object({
@@ -69,16 +70,12 @@ const formSchema = z.object({
 
 // For tracking in the website
 const siteTrackingSchema = z.object({
-  name: z.string(),
+  workoutName: z.string(), // Rename to workoutName
   exercises: z.array(
     z.object({
-      name: z.string(),
+      exerciseName: z.string(), // Rename to exerciseName
       sets: z.array(
-        z.object({
-          number: z.number(),
-          reps: z.number(),
-          weight: z.number(),
-        })
+        z.object({ reps: z.coerce.number(), weight: z.coerce.number() })
       ),
     })
   ),
@@ -88,8 +85,14 @@ const Track = () => {
   const { data: session, status } = useSession();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(true);
   const [trackMode, setTrackMode] = useState<number | null>(null);
+  const [exercises, setExercises] = useState<Exercise[]>([
+    {
+      name: "",
+      sets: [{ number: 1, weight: 0, reps: 0 }],
+    },
+  ]);
+
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -101,7 +104,7 @@ const Track = () => {
   });
 
   // Function to parse workout text input
-  function parseWorkoutText(workoutText: string) {
+  const parseWorkoutText = (workoutText: string) => {
     const workout: Workout = {
       name: "",
       exercises: [
@@ -149,20 +152,89 @@ const Track = () => {
 
     workout.exercises = exercises;
     return workout;
-  }
+  };
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(radius);
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    console.log("Radius: " + radius);
     setSubmitting(true);
+
     // Parse the workout text
     const parsedWorkout = parseWorkoutText(values.workoutText);
     console.log(parsedWorkout);
+
+    // Custom validation logic
+    if (!parsedWorkout.name) {
+      setError("Workout name is required.");
+      setSubmitting(false);
+      return;
+    }
+
+    if (!parsedWorkout.exercises || parsedWorkout.exercises.length === 0) {
+      setError("At least one exercise is required.");
+      setSubmitting(false);
+      return;
+    }
+
+    for (const exercise of parsedWorkout.exercises) {
+      if (!exercise.name) {
+        setError("Exercise name is required for all exercises.");
+        setSubmitting(false);
+        return;
+      }
+
+      if (!exercise.sets || exercise.sets.length === 0) {
+        setError("At least one set is required for each exercise.");
+        setSubmitting(false);
+        return;
+      }
+    }
+
+    // If all custom validation checks pass, proceed with submission
     const res = await fetch(`/api/track/${session?.user?.id}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ workout: parsedWorkout }),
+    });
+
+    if (res.status === 200) {
+      // Rest of your code for successful submission
+    } else if (res.status === 500) {
+      toast({
+        title: "Error ❌",
+        description: "Server error",
+      });
+    }
+    setSubmitting(false);
+  };
+
+  const onSubmitSiteTracking = async (
+    values: z.infer<typeof siteTrackingSchema>
+  ) => {
+    console.log(values);
+    setSubmitting(true);
+
+    const workout: Workout = {
+      name: values.workoutName,
+      exercises: values.exercises.map((exerciseData) => ({
+        name: exerciseData.exerciseName,
+        sets: exerciseData.sets.map((setData, setIndex) => ({
+          number: setIndex + 1,
+          weight: setData.weight,
+          reps: setData.reps,
+        })),
+      })),
+    };
+
+    const res = await fetch(`/api/track/${session?.user?.id}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        workout: workout,
+      }),
     });
 
     if (res.status === 200) {
@@ -207,7 +279,7 @@ const Track = () => {
       });
     }
     setSubmitting(false);
-  }
+  };
 
   const verify = async () => {
     if ("geolocation" in navigator) {
@@ -256,20 +328,20 @@ const Track = () => {
             });
           } else if (res.status === 200) {
             // If the user has not already tracked a workout today: good to go
-            setTrackMode(2);
+            setTrackMode(1);
           }
         } else {
           // If the user is out of range of Pohl Rec Center
           setError(
             `You are too far from Pohl Rec Center. Distance is ${distanceKm.toFixed(
               2
-            )}`
+            )} km`
           );
           toast({
             title: "Error",
             description: `You are too far from Pohl Rec Center. Distance is ${distanceKm.toFixed(
               2
-            )}`,
+            )} km`,
           });
         }
       });
@@ -283,154 +355,292 @@ const Track = () => {
     }
   };
 
-  useEffect(() => {
-    if (status !== "loading") {
-      setLoading(false);
-    }
-  }, [session, status]);
+  const addSetToExercise = (exerciseIndex: number) => {
+    setExercises((prevExercises) => {
+      const updatedExercises = [...prevExercises];
+      updatedExercises[exerciseIndex].sets.push({
+        number: updatedExercises[exerciseIndex].sets.length + 1,
+        weight: 0, // You can set the initial values as needed
+        reps: 0,
+      });
+      return updatedExercises;
+    });
+  };
 
   return (
     <>
-      {loading ? (
+      {status === "loading" ? (
         <Loader />
       ) : !session ? (
         <>
           <AuthenticationMessage to="track your workout" />
         </>
       ) : (
-        <Card>
-          <CardHeader>
-            <CardTitle>Track Workout</CardTitle>
-            <CardDescription>
-              Track your workouts when you&apos;re at Pohl Rec Center
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {!trackMode ? (
-              <>
-                <h1>
-                  Start tracking your workout now (requires location
-                  permission).
-                </h1>
-                <Button
-                  className="mt-4"
-                  onClick={() => verify()}
-                  disabled={submitting}>
-                  Track Now
-                </Button>
-                <h1 className="text-red-600 mt-2">{error}</h1>
-              </>
-            ) : trackMode == 1 ? (
-              // In site tracking
-              <>
-                {/* <Form {...siteTrackingForm}>
-                  <form
-                    onSubmit={siteTrackingForm.handleSubmit(onSubmit)}
-                    className="space-y-8">
-                    <FormField
-                      control={siteTrackingForm.control}
-                      name="name"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Workout Text</FormLabel>
-                          <FormControl>
-                            <Input placeholder="PPL - PUSH" {...field} />
-                          </FormControl>
-                          <FormDescription>
-                            The name of your workout
-                          </FormDescription>
-                          <FormMessage />
-                        </FormItem>
+        <section id="track" className="flex-col">
+          <h1 className="heading">Track Workout</h1>
+          <h2 className="text-xl text-gray-500 mt-1 mb-4">
+            Track your workouts when you&apos;re at Pohl
+          </h2>{" "}
+          <Card className="">
+            <CardHeader>
+              <CardTitle>
+                {trackMode == null
+                  ? "Start Tracking"
+                  : trackMode === 1
+                  ? "Track In Site"
+                  : "Input Text"}
+              </CardTitle>
+              <CardDescription>
+                {trackMode == null
+                  ? "Verify you are at Pohl Rec Center"
+                  : trackMode === 1
+                  ? "Track your workout all inside the site"
+                  : "Input text from the Hevy App"}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {!trackMode ? (
+                <>
+                  <h1>
+                    Verify your location and start tracking (requires location
+                    permission).
+                  </h1>
+                  <Button
+                    className="mt-4"
+                    onClick={() => verify()}
+                    disabled={submitting}>
+                    Start
+                  </Button>
+                  <h1 className="text-red-600 mt-2">{error}</h1>
+                </>
+              ) : trackMode == 1 ? (
+                // In site tracking
+                <>
+                  <Form {...siteTrackingForm}>
+                    <form
+                      onSubmit={siteTrackingForm.handleSubmit(
+                        onSubmitSiteTracking
                       )}
-                    />
-                    <Button className="mt-4" type="submit">
-                      Finish Workout
-                    </Button>
-                    <Button
-                      variant="secondary"
-                      className="ml-2"
-                      type="button"
-                      onClick={() => setTrackMode(2)}>
-                      Switch Type
-                    </Button>
-                  </form>
-                </Form> */}
-              </>
-            ) : (
-              <>
-                <Form {...form}>
-                  <form
-                    onSubmit={form.handleSubmit(onSubmit)}
-                    className="space-y-8">
-                    <FormField
-                      control={form.control}
-                      name="workoutText"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Workout Text</FormLabel>
-                          <FormControl>
-                            <Textarea
-                              className="h-40"
-                              placeholder="Workout Text Here"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormDescription>
-                            Input the text generated from your workout tracker
-                            <Dialog>
-                              <DialogTrigger>
-                                <span className="ml-1 link text-gray-600 transition-colors">
-                                  Example
-                                </span>
-                              </DialogTrigger>
-                              <DialogContent>
-                                <DialogHeader>
-                                  <DialogTitle>
-                                    Example Workout Text Input
-                                  </DialogTitle>
-                                  <DialogDescription>
-                                    PPL - PUSH Thursday, Aug 24, 2023 at 8:26pm
-                                    <br />
-                                    Bench Press (Dumbbell) Set 1: 112.5 lbs x 7
-                                    <br />
-                                    Set 2: 115 lbs x 7 Set 3: 115 lbs x 7<br />
-                                    [Failure] Seated Shoulder Press (Machine)
-                                    <br />
-                                    Set 1: 90 lbs x 12 Set 2: 100 lbs x 8 Set 3:
-                                    <br />
-                                    90 lbs x 10 Triceps Rope Pushdown Set 1: 35
-                                    <br />
-                                    lbs x 12 Set 2: 30 lbs x 12 Set 3: 37.5 lbs
-                                    <br />
-                                    x 12 [Failure] @hevyapp
-                                    <br />
-                                    https://hevy.com/workout/JZeyhzOREph
-                                    <br />
-                                  </DialogDescription>
-                                </DialogHeader>
-                              </DialogContent>
-                            </Dialog>
-                          </FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <Button className="mt-4" type="submit">
-                      Finish Workout
-                    </Button>
-                    {/* <Button
-                      variant="secondary"
-                      className="ml-2"
-                      type="button"
-                      onClick={() => setTrackMode(1)}>
-                      Switch Type
-                    </Button> */}
-                  </form>
-                </Form>
-              </>
-            )}
-          </CardContent>
-        </Card>
+                      className="space-y-6">
+                      <FormField
+                        control={siteTrackingForm.control}
+                        name="workoutName" // Use "workoutName" instead of "name"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Workout Name</FormLabel>
+                            <FormControl>
+                              <Input placeholder="PPL - PUSH" {...field} />
+                            </FormControl>
+                            <FormDescription>
+                              The name of your workout
+                            </FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      {exercises.map((exercise, index) => (
+                        <div key={index}>
+                          <h1 className="text-2xl font-bold">
+                            Exercise #{index + 1}
+                          </h1>
+                          {/* Render the form fields for this exercise here */}
+                          <FormField
+                            control={siteTrackingForm.control}
+                            name={`exercises.${index}.exerciseName`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Exercise Name</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    placeholder="Exercise Name"
+                                    {...field}
+                                  />
+                                </FormControl>
+                                <FormDescription>
+                                  The name of your exercise
+                                </FormDescription>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          {/* Render sets for this exercise */}
+                          <h2 className="text-xl font-semibold mt-4 mb-2">
+                            Sets
+                          </h2>
+                          {exercise.sets.map((set, setIndex) => (
+                            <div key={setIndex}>
+                              {/* <h2 className="text-xl font-semibold mt-4 mb-2">
+                              Set #{setIndex + 1}
+                            </h2> */}
+                              <div className="flex flex-row">
+                                {" "}
+                                <FormField
+                                  control={siteTrackingForm.control}
+                                  name={`exercises.${index}.sets.${setIndex}.weight`}
+                                  render={({ field }) => (
+                                    <FormItem className="inline mr-2">
+                                      {/* <FormLabel>Weight X Reps</FormLabel> */}
+                                      <FormControl>
+                                        <Input
+                                          placeholder="Weight"
+                                          type="number"
+                                          {...field}
+                                        />
+                                      </FormControl>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+                                <FormField
+                                  control={siteTrackingForm.control}
+                                  name={`exercises.${index}.sets.${setIndex}.reps`}
+                                  render={({ field }) => (
+                                    <FormItem className="inline mb-2">
+                                      {/* <FormLabel className="text-white">
+                                      W
+                                    </FormLabel> */}
+                                      <FormControl>
+                                        <Input
+                                          placeholder="Reps"
+                                          type="number"
+                                          {...field}
+                                        />
+                                      </FormControl>
+                                      {/* <FormDescription>
+                                      The weight used x The number of reps
+                                    </FormDescription> */}
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+                              </div>
+                            </div>
+                          ))}
+                          <Button
+                            type="button"
+                            className="block mt-2 mb-8"
+                            onClick={() => addSetToExercise(index)}>
+                            <PlusIcon width={16} className="inline mb-0.5" />{" "}
+                            Add Set
+                          </Button>
+                        </div>
+                      ))}
+                      <Button
+                        type="button"
+                        className="block mb-4"
+                        onClick={() =>
+                          setExercises((prevExercises) => [
+                            ...prevExercises,
+                            {
+                              name: "",
+                              sets: [{ number: 1, weight: 0, reps: 0 }],
+                            },
+                          ])
+                        }>
+                        <PlusIcon width={16} className="inline mb-0.5" /> Add
+                        Exercise
+                      </Button>
+                      <Button
+                        className="mt-4"
+                        type="submit"
+                        disabled={submitting}>
+                        {submitting ? "Submitting" : "Finish Workout"}
+                      </Button>
+                      <Button
+                        variant="secondary"
+                        className="ml-2"
+                        type="button"
+                        onClick={() => setTrackMode(2)}>
+                        Switch Mode
+                      </Button>
+                    </form>
+                  </Form>
+                </>
+              ) : (
+                <>
+                  <Form {...form}>
+                    <form
+                      onSubmit={form.handleSubmit(onSubmit)}
+                      className="space-y-8">
+                      <FormField
+                        control={form.control}
+                        name="workoutText"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Workout Text</FormLabel>
+                            <FormControl>
+                              <Textarea
+                                className="h-40"
+                                placeholder="Workout Text Here"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormDescription>
+                              Input the text generated from your workout tracker
+                              <Dialog>
+                                <DialogTrigger>
+                                  <span className="ml-1 link text-gray-600 transition-colors">
+                                    Example
+                                  </span>
+                                </DialogTrigger>
+                                <DialogContent>
+                                  <DialogHeader>
+                                    <DialogTitle>
+                                      Example Workout Text Input
+                                    </DialogTitle>
+                                    <DialogDescription>
+                                      PPL - PUSH Thursday, Aug 24, 2023 at
+                                      8:26pm
+                                      <br />
+                                      Bench Press (Dumbbell) Set 1: 112.5 lbs x
+                                      7
+                                      <br />
+                                      Set 2: 115 lbs x 7 Set 3: 115 lbs x 7
+                                      <br />
+                                      [Failure] Seated Shoulder Press (Machine)
+                                      <br />
+                                      Set 1: 90 lbs x 12 Set 2: 100 lbs x 8 Set
+                                      3:
+                                      <br />
+                                      90 lbs x 10 Triceps Rope Pushdown Set 1:
+                                      35
+                                      <br />
+                                      lbs x 12 Set 2: 30 lbs x 12 Set 3: 37.5
+                                      lbs
+                                      <br />
+                                      x 12 [Failure] @hevyapp
+                                      <br />
+                                      https://hevy.com/workout/JZeyhzOREph
+                                      <br />
+                                    </DialogDescription>
+                                  </DialogHeader>
+                                </DialogContent>
+                              </Dialog>
+                            </FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <Button
+                        className="mt-4"
+                        type="submit"
+                        disabled={submitting}>
+                        {submitting ? "Submitting" : "Finish Workout"}
+                      </Button>
+                      <Button
+                        variant="secondary"
+                        className="ml-2"
+                        type="button"
+                        onClick={() => setTrackMode(1)}>
+                        Switch Mode
+                      </Button>
+                    </form>
+                  </Form>
+                </>
+              )}
+            </CardContent>
+          </Card>
+        </section>
       )}
     </>
   );

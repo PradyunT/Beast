@@ -101,7 +101,7 @@
 }
 
 .link {
-  @apply hover:text-blue-500 underline;
+  @apply hover:text-blue-500 underline transition-colors;
 }
 
 .profile-content {

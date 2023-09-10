@@ -33,10 +33,16 @@ export const POST = async (req) => {
       let totalLogs = 0;
       let totalGoal = 0;
 
-      consistencyGoal.weekLog.forEach((week) => {
+      consistencyGoal.weekLog.forEach((week, index) => {
         totalLogs += week.logs;
-        totalGoal += consistencyGoal.frequency;
+        if (index === consistencyGoal.weekLog.length - 1) {
+          // Use initFrequency for the last week
+          totalGoal += consistencyGoal.initFrequency;
+        } else {
+          totalGoal += consistencyGoal.frequency;
+        }
       });
+
       const progress = totalLogs / totalGoal;
       foundGoal.progress = progress;
     } else if (foundGoal.type === "weight") {

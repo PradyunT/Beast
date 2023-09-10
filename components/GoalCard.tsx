@@ -14,6 +14,12 @@ import { useState } from "react";
 import { useSession } from "next-auth/react";
 import goal from "@/types/goal";
 import { formatTitle, formatDate } from "@/utils/format";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Close } from "@radix-ui/react-popover";
 
 const GoalCard = ({
   goal,
@@ -204,9 +210,23 @@ const GoalCard = ({
             Update
           </Button>
         )}
-        <Button onClick={() => handleDelete(goal._id)} disabled={deleting}>
-          {deleting ? "Deleting" : "Delete"}
-        </Button>
+        <Popover>
+          <PopoverTrigger>
+            <Button>Delete</Button>
+          </PopoverTrigger>
+          <PopoverContent>
+            <div className="flex flex-row">
+              <h1>Are you sure you want to delete this goal?</h1>
+              <Close>
+                <Button
+                  onClick={() => handleDelete(goal._id)}
+                  disabled={deleting}>
+                  Yes
+                </Button>
+              </Close>
+            </div>
+          </PopoverContent>
+        </Popover>
       </CardFooter>
     </Card>
   );
