@@ -14,12 +14,12 @@ const guides = () => {
         <Link
           className="header-link text-2xl font-semibold mt-1 block"
           href="/guides/bulking">
-          How to start Bulking (WIP🛠️) <LinkIcon className="inline" />
+          How to start Bulking <LinkIcon className="inline" />
         </Link>
         <Link
           className="header-link text-2xl font-semibold mt-1 block"
           href="/guides/cutting">
-          How to start Cutting (WIP🛠️) <LinkIcon className="inline" />
+          How to start Cutting <LinkIcon className="inline" />
         </Link>
       </div>
     </div>

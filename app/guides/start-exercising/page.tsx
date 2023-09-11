@@ -5,7 +5,7 @@ const StartExercising = () => {
     <div className="max-w-[90vw]">
       <h1 className="heading">How to Get Started at the Gym</h1>
       <h1 className="mt-0.5 text-gray-500">
-        Written by: Pradyun Tandra & Joe Joseph
+        Written by: Pradyun Tandra, Sadie Ostrowicki, Joe Joseph, Jonathan Leung
       </h1>
       <h1 className="text-2xl font-semibold mt-4">Table of contents</h1>
       <div className="text-xl font-medium">
