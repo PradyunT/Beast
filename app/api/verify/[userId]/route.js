@@ -5,7 +5,6 @@ import Workout from "@/models/workout";
 export const GET = async (req, { params }) => {
   try {
     await connectToDB();
-    console.log(params.userId);
 
     // Check if user has already submitted a workout
     const foundUser = await User.findById(params.userId).populate("workouts");
@@ -18,11 +17,9 @@ export const GET = async (req, { params }) => {
       const latestWorkoutDate = latestWorkout.date;
 
       if (
-        // FIXME
-        false
-        // currentDate.getUTCFullYear() === latestWorkoutDate.getUTCFullYear() &&
-        // currentDate.getUTCMonth() === latestWorkoutDate.getUTCMonth() &&
-        // currentDate.getUTCDate() === latestWorkoutDate.getUTCDate()
+        currentDate.getUTCFullYear() === latestWorkoutDate.getUTCFullYear() &&
+        currentDate.getUTCMonth() === latestWorkoutDate.getUTCMonth() &&
+        currentDate.getUTCDate() === latestWorkoutDate.getUTCDate()
       ) {
         // User already has tracked a workout today
         return new Response("You've already tracked a workout today", {
