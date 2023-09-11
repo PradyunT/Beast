@@ -67,19 +67,19 @@ const Bulking = () => {
         determine your daily caloric needs to maintain your current weight. This
         can be done using online calculators or consulting with a nutritionist.
         This calculator is a good place to start. Remember that these
-        calculators are an estimate, and don’t factor in your total activity
-        level, genetics and personal needs. <br />
+        calculators are an estimate, and don&apos;t factor in your total
+        activity level, genetics and personal needs. <br />
         <br />
         <span className="text-lg font-semibold">Step 3: </span> Create a Calorie
         Deficit <br />
-        To lose weight, you'll need to consume fewer calories than your
+        To lose weight, you&apos;ll need to consume fewer calories than your
         maintenance level. A common starting point is a calorie deficit of
         300-500 calories per day. <br />
         This is a tough step for many people, and there are many tools that can
         help you. Calorie counting apps and even journaling the food you eat in
         a day can help you. Oftentimes people have to retrain their stomachs to
         be satisfied at different fullnesses. Know that it gets easier the
-        longer you do it, so it’s mainly a challenge of mental toughness,
+        longer you do it, so it&apos;s mainly a challenge of mental toughness,
         especially at the beginning.
         <br />
         <br />
@@ -88,8 +88,8 @@ const Bulking = () => {
         To make the calories you consume count, focus on whole, nutrient-dense
         foods like lean meats, fish, fruits, vegetables, whole grains, and
         healthy fats. Try to limit sugary and processed foods, especially those
-        that are high in calories. That being said, don’t cut out all the foods
-        you love, or else you will lose motivation! <br />
+        that are high in calories. That being said, don&apos;t cut out all the
+        foods you love, or else you will lose motivation! <br />
         You should also ensure that your diet includes enough protein to retain
         the muscle you already have. Aim for around 0.8 to 1 gram(s) of protein
         per pound of body weight. Some protein sources include lean meats, fish,
@@ -102,38 +102,35 @@ const Bulking = () => {
         Training and Cardio <br />
         Resistance training helps preserve and potentially build muscle while in
         a calorie deficit. This is mainly done through weight training, so if
-        you don’t know where to start, come to a BEAST workshop or tag along
-        with someone who already knows the basics. <br />
+        you don&apos;t know where to start, come to a BEAST workshop or tag
+        along with someone who already knows the basics. <br />
         At the same time, cardiovascular exercises can burn additional calories,
         making it easier to stay in a calorie deficit. Options include exercises
         like walking, jogging, or swimming, but joining a sports team like
         frisbee, basketball and soccer also count. <br />
         The rock climbing wall is a combination of both strength training and
-        cardio, so that’s also a fun option.
+        cardio, so that&apos;s also a fun option.
         <br />
         <br />
         <span className="text-lg font-semibold">Step 6: </span>
         Be Patient and Consistent Regularly <br /> assess your progress by
         tracking changes in your weight, body measurements, and or even using a
-        piece of clothing as a reference point. Remember that progress isn’t
-        always linear, and it’s normal for things to fluctuate over time. Even
-        if you have a bad day, week, or month, incorporating just a few more
-        healthy habits is considered progress. <br />
+        piece of clothing as a reference point. Remember that progress
+        isn&apos;t always linear, and it&apos;s normal for things to fluctuate
+        over time. Even if you have a bad day, week, or month, incorporating
+        just a few more healthy habits is considered progress. <br />
         Cutting takes time, so be patient and stay consistent with your diet and
-        exercise plan. Be ready to forgive yourself if things don’t go as
-        planned, and talk to an exec if you want support. Don’t forget to
+        exercise plan. Be ready to forgive yourself if things don&apos;t go as
+        planned, and talk to an exec if you want support. Don&apos;t forget to
         celebrate small achievements along the way!
       </p>
-      <h1
-        className="text-2xl font-semibold mt-4"
-        id="what-to-eat-at-TAMS
-">
+      <h1 className="text-2xl font-semibold mt-4" id="what-to-eat-at-TAMS">
         What to eat at TAMS
       </h1>
       <p className="mb-2">
         UNT is great at offering a lot of low-calorie, high-protein and nutrient
         dense foods, you just have to know what to look for. Here are some of my
-        favorite options at Eagle's Landing:
+        favorite options at Eagle&apos;s Landing:
       </p>
       <p className="mb-2">
         Bean Bowl (La Mesa): Veggies, black beans, shredded chicken, pico de
@@ -160,21 +157,21 @@ const Bulking = () => {
       <p className="mb-2">
         Get creative with it! You may have to mix and match different items that
         you like, but make sure you always include a protein and veggie. For
-        dessert, I like some fruit, but don’t deprive yourself of a cookie if
-        you’re really craving it.
+        dessert, I like some fruit, but don&apos;t deprive yourself of a cookie
+        if you&apos;re really craving it.
       </p>
 
       <h1 className="text-2xl font-semibold mt-4" id="when-to-stop-cutting">
         When to Stop Cutting
       </h1>
       <p className="leading-6">
-        Once you reach your goal, congratulations! It’s important to stop and
-        reassess your goals, because you want your body to recover and adapt.
-        You also don’t want to spend your entire life on a diet, as it can be
-        mentally and physically exhausting. <br /> <br />
+        Once you reach your goal, congratulations! It&apos;s important to stop
+        and reassess your goals, because you want your body to recover and
+        adapt. You also don&apos;t want to spend your entire life on a diet, as
+        it can be mentally and physically exhausting. <br /> <br />
         To stop losing weight, you should aim to consume calories equal to your
-        maintenance level. If you've been in a significant calorie deficit
-        during your cutting phase, it's essential to increase your calorie
+        maintenance level. If you&apos;ve been in a significant calorie deficit
+        during your cutting phase, it&apos;s essential to increase your calorie
         intake gradually to avoid sudden weight gain or metabolic issues. <br />{" "}
         <br />
         This is a warning: If your calorie restriction is too long and extreme,
