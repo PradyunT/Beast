@@ -61,7 +61,7 @@ interface Workout {
 
 const gymLat = 33.212060808618546;
 const gymLong = -97.15406761440391;
-const radius: number = 1; //FIXME
+const radius: number = 0.5; //FIXME
 
 // For plain text input
 const formSchema = z.object({
@@ -199,7 +199,40 @@ const Track = () => {
     });
 
     if (res.status === 200) {
-      // Rest of your code for successful submission
+      toast({
+        title: "Workout submitted ✅",
+        description: "Your workout has been tracked",
+      });
+      // Check if user has a consistency goal
+      const res = await fetch(`/api/users/getuser/${session?.user.id}`, {
+        method: "GET",
+      });
+      const user = await res.json();
+      const consistencyGoal = user.goals.find(
+        (goal: goal) => goal.type === "consistency"
+      );
+      if (consistencyGoal) {
+        // If user has consistency goal
+        const res = await fetch("/api/goals/update-goal", {
+          method: "POST",
+          body: JSON.stringify({
+            goalId: consistencyGoal._id,
+          }),
+        });
+        if (res.status === 200) {
+          toast({
+            title: "Successfully updated consistency goal ✅",
+            description:
+              "Your workout has been tracked toward your consistency goal",
+          });
+        } else if (res.status === 500) {
+          toast({
+            title: "Server error while trying to update consistency goal ❌",
+            description:
+              "There was a server error while trying to update your consistency goal",
+          });
+        }
+      }
     } else if (res.status === 500) {
       toast({
         title: "Error ❌",
