@@ -142,7 +142,7 @@ const Navbar = () => {
           />
         </Link>
         <Sheet open={open}>
-          <SheetTrigger onClick={() => setOpen(true)} className="mt-8 ml-10">
+          <SheetTrigger onClick={() => setOpen(true)} className="mt-8 ml-8">
             <Menu />
           </SheetTrigger>
           <SheetContent side="top" onInteractOutside={() => setOpen(false)}>

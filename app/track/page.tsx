@@ -85,7 +85,7 @@ const Track = () => {
   const { data: session, status } = useSession();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
-  const [trackMode, setTrackMode] = useState<number | null>(null);
+  const [trackMode, setTrackMode] = useState<number | null>(1);
   const [exercises, setExercises] = useState<Exercise[]>([
     {
       name: "",
@@ -155,12 +155,10 @@ const Track = () => {
   };
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    console.log("Radius: " + radius);
     setSubmitting(true);
 
     // Parse the workout text
     const parsedWorkout = parseWorkoutText(values.workoutText);
-    console.log(parsedWorkout);
 
     // Custom validation logic
     if (!parsedWorkout.name) {
@@ -246,7 +244,6 @@ const Track = () => {
   const onSubmitSiteTracking = async (
     values: z.infer<typeof siteTrackingSchema>
   ) => {
-    console.log(values);
     setSubmitting(true);
 
     const workout: Workout = {
@@ -553,7 +550,8 @@ const Track = () => {
                           ))}
                           <Button
                             type="button"
-                            className="block mt-2 mb-8"
+                            variant="secondary"
+                            className="block mt-2 mb-8 w-[100%]"
                             onClick={() => addSetToExercise(index)}>
                             <PlusIcon width={16} className="inline mb-0.5" />{" "}
                             Add Set
@@ -562,7 +560,7 @@ const Track = () => {
                       ))}
                       <Button
                         type="button"
-                        className="block mb-4"
+                        className="block mb-4 w-[100%]"
                         onClick={() =>
                           setExercises((prevExercises) => [
                             ...prevExercises,
@@ -572,18 +570,18 @@ const Track = () => {
                             },
                           ])
                         }>
-                        <PlusIcon width={16} className="inline mb-0.5" /> Add
+                        <PlusIcon width={16} className="inline mb-0.5 " /> Add
                         Exercise
                       </Button>
                       <Button
-                        className="mt-4"
+                        className="mt-4 w-[48%] mr-[4%] inline"
                         type="submit"
                         disabled={submitting}>
                         {submitting ? "Submitting" : "Finish Workout"}
                       </Button>
                       <Button
                         variant="secondary"
-                        className="ml-2"
+                        className="w-[48%] inline"
                         type="button"
                         onClick={() => setTrackMode(2)}>
                         Switch Mode
