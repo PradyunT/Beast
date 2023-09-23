@@ -15,6 +15,7 @@ const goalSchema = new Schema({
   consistency: {
     frequency: Number,
     initFrequency: Number,
+    latestUpdateDate: Date,
     weekLog: [{ date: Date, logs: Number }],
   },
 

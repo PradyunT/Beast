@@ -6,9 +6,10 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  CardFooter,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useToast } from "@/components/ui/use-toast";
 import {
@@ -61,7 +62,7 @@ interface Workout {
 
 const gymLat = 33.212060808618546;
 const gymLong = -97.15406761440391;
-const radius: number = 0.5;
+const radius: number = 1; // FIXME
 
 // For plain text input
 const formSchema = z.object({
@@ -85,7 +86,10 @@ const Track = () => {
   const { data: session, status } = useSession();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
-  const [trackMode, setTrackMode] = useState<number | null>(1);
+  const [error2, setError2] = useState("");
+  const [trackMode, setTrackMode] = useState<number | null>(null);
+  const [consistencyGoal, setConsistencyGoal] = useState<goal | null>(null);
+
   const [exercises, setExercises] = useState<Exercise[]>([
     {
       name: "",
@@ -94,6 +98,30 @@ const Track = () => {
   ]);
 
   const { toast } = useToast();
+
+  const getConsistencyGoal = async () => {
+    try {
+      const res = await fetch(`/api/users/getuser/${session?.user?.id}`, {
+        method: "GET",
+      });
+      const user = await res.json();
+      // setProfile(user);
+      const foundConsistencyGoal = user.goals.find(
+        (goal: goal) => goal.type === "consistency"
+      );
+      if (foundConsistencyGoal) {
+        setConsistencyGoal(foundConsistencyGoal);
+      }
+    } catch (err) {
+      console.error("Error fetching profile: ", err);
+    }
+  };
+
+  useEffect(() => {
+    if (status !== "loading") {
+      getConsistencyGoal();
+    }
+  }, [session]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -201,14 +229,8 @@ const Track = () => {
         title: "Workout submitted ✅",
         description: "Your workout has been tracked",
       });
+
       // Check if user has a consistency goal
-      const res = await fetch(`/api/users/getuser/${session?.user.id}`, {
-        method: "GET",
-      });
-      const user = await res.json();
-      const consistencyGoal = user.goals.find(
-        (goal: goal) => goal.type === "consistency"
-      );
       if (consistencyGoal) {
         // If user has consistency goal
         const res = await fetch("/api/goals/update-goal", {
@@ -387,6 +409,85 @@ const Track = () => {
     }
   };
 
+  const handleQuickUpdate = async () => {
+    setSubmitting(true);
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(async function (position) {
+        const userLat = position.coords.latitude;
+        const userLng = position.coords.longitude;
+        const radianConversion = (degrees: number) => degrees * (Math.PI / 180);
+        const earthRadiusKm = 6371;
+
+        const lat1 = radianConversion(userLat);
+        const lon1 = radianConversion(userLng);
+        const lat2 = radianConversion(gymLat);
+        const lon2 = radianConversion(gymLong);
+
+        const dLat = lat2 - lat1;
+        const dLon = lon2 - lon1;
+
+        const a =
+          Math.sin(dLat / 2) ** 2 +
+          Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLon / 2) ** 2;
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+        // Calculate the distance in kilometers
+        const distanceKm = earthRadiusKm * c;
+
+        if (distanceKm < radius) {
+          // If the user is in range of Pohl Rec Center: Check if the user's latest workout was within the past day
+          const res = await fetch(
+            `/api/verify/consistency/${session?.user?.id}`,
+            {
+              method: "GET",
+            }
+          );
+          if (res.status === 500) {
+            setError2(
+              "Server error while verifying if the user can track the workout today"
+            );
+            toast({
+              title: "Error",
+              description:
+                "Server error while verifying if the user can track the workout today",
+            });
+          } else if (res.status === 403) {
+            // If the user has already tracked a workout today
+            setError2("You have already tracked a workout today");
+            toast({
+              title: "Error",
+              description: "You have already tracked a workout today",
+            });
+          } else if (res.status === 200) {
+            // If the user has not already tracked a workout today: good to go
+            setTrackMode(1);
+          }
+        } else {
+          // If the user is out of range of Pohl Rec Center
+          setError2(
+            `You are too far from Pohl Rec Center. Distance is ${distanceKm.toFixed(
+              2
+            )} km`
+          );
+          toast({
+            title: "Error",
+            description: `You are too far from Pohl Rec Center. Distance is ${distanceKm.toFixed(
+              2
+            )} km`,
+          });
+        }
+      });
+    } else {
+      // If geolocation is not in the navigator object
+      setError2("Unable to get location. Check location permissions.");
+      toast({
+        title: "Error",
+        description: "Unable to get location. Check location permissions.",
+      });
+    }
+    setSubmitting(false);
+  };
+
   const addSetToExercise = (exerciseIndex: number) => {
     setExercises((prevExercises) => {
       const updatedExercises = [...prevExercises];
@@ -411,9 +512,26 @@ const Track = () => {
         <section id="track" className="flex-col">
           <h1 className="heading">Track Workout</h1>
           <h2 className="text-xl text-gray-500 mt-1 mb-4">
-            Track your workouts when you&apos;re at Pohl
+            Track your workouts and update your consistency goal when
+            you&apos;re at Pohl
           </h2>{" "}
-          <Card className="">
+          {consistencyGoal && !trackMode && (
+            <Card className="mb-4">
+              <CardHeader>
+                <CardTitle>Quick Update</CardTitle>
+                <CardDescription>
+                  Update your consistency goal here
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button disabled={submitting} onClick={handleQuickUpdate}>
+                  Update Goal
+                </Button>
+                <h1 className="text-red-600 mt-2">{error2}</h1>
+              </CardContent>
+            </Card>
+          )}
+          <Card>
             <CardHeader>
               <CardTitle>
                 {trackMode == null

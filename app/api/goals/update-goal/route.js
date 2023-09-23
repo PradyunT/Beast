@@ -45,6 +45,11 @@ export const POST = async (req) => {
 
       const progress = totalLogs / totalGoal;
       foundGoal.progress = progress;
+
+      // Update latestUpdateDate
+      consistencyGoal.latestUpdateDate = new Date();
+
+      foundGoal.markModified("consistency");
     } else if (foundGoal.type === "weight") {
       // Update currentWeight
       const { currentWeight } = data;

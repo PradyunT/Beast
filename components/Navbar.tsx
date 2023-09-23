@@ -77,7 +77,7 @@ const Navbar = () => {
             <NavigationMenuItem>
               <Link href="/track" legacyBehavior passHref>
                 <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                  Track Workout
+                  Track
                 </NavigationMenuLink>
               </Link>
             </NavigationMenuItem>
@@ -156,7 +156,7 @@ const Navbar = () => {
               <SheetTitle className="mb-2 text-2xl">Menu</SheetTitle>
               <SheetDescription className="flex-col flex text-lg font-semibold gap-4 text-black underline underline-offset-4">
                 <Link href="/guides">Guides</Link>
-                <Link href="/track">Track Workout</Link>
+                <Link href="/track">Track</Link>
                 <Link href="/leaderboard">Leaderboard</Link>
                 <Link href="/profile">Profile</Link>
                 {session ? (

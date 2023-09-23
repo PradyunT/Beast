@@ -20,6 +20,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Close } from "@radix-ui/react-popover";
+import Link from "next/link";
 
 const GoalCard = ({
   goal,
@@ -133,7 +134,7 @@ const GoalCard = ({
           </>
         ) : (
           <>
-            {goal.distanceCardio.cardioType === "staticTime" ? (
+            {goal.distanceCardio?.cardioType === "staticTime" ? (
               <>
                 <h1 className="profile-content">
                   {" "}
@@ -202,7 +203,13 @@ const GoalCard = ({
         )}
       </CardContent>
       <CardFooter>
-        {goal.type !== "consistency" && (
+        {goal.type == "consistency" ? (
+          <Link href="/track">
+            <Button variant="secondary" className="mr-2">
+              Update
+            </Button>
+          </Link>
+        ) : (
           <Button
             variant="secondary"
             className="mr-2"
