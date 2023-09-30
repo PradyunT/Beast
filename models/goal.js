@@ -15,10 +15,9 @@ const goalSchema = new Schema({
   consistency: {
     frequency: Number,
     initFrequency: Number,
-    latestUpdateDate: Date,
+    latestUpdateDate: { type: Date, default: Date.now() },
     weekLog: [{ date: Date, logs: Number }],
   },
-
   weight: {
     phase: {
       type: String,

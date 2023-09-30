@@ -10,8 +10,9 @@ export const POST = async (req) => {
     let newGoal;
 
     if (type === "consistency") {
+      // Verify User does not already have a consistency goal
       const { frequency } = data;
-      
+
       // Calculate initFrequency based on days until next Sunday
       const today = new Date();
       const daysUntilNextSunday = 7 - today.getDay();

@@ -366,12 +366,12 @@ const Track = () => {
           });
           if (res.status === 500) {
             setError(
-              "Server error while verifying if the user can track the workout today"
+              "❌ Server error while verifying if the user has already tracked a workout"
             );
             toast({
               title: "Error",
               description:
-                "Server error while verifying if the user can track the workout today",
+                "❌ Server error while verifying if the user has already tracked a workout",
             });
           } else if (res.status === 403) {
             // If the user has already tracked a workout today
@@ -444,12 +444,12 @@ const Track = () => {
           );
           if (res.status === 500) {
             setError2(
-              "Server error while verifying if the user can track the workout today"
+              "❌ Server error while verifying if the user has already tracked a workout"
             );
             toast({
               title: "Error",
               description:
-                "Server error while verifying if the user can track the workout today",
+                "❌ Server error while verifying if the user has already tracked a workout",
             });
           } else if (res.status === 403) {
             // If the user has already tracked a workout today
@@ -515,6 +515,7 @@ const Track = () => {
             Track your workouts and update your consistency goal when
             you&apos;re at Pohl
           </h2>{" "}
+          {/* Quick Update */}
           {consistencyGoal && !trackMode && (
             <Card className="mb-4">
               <CardHeader>
