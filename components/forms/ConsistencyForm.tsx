@@ -41,27 +41,38 @@ const ConsistencyForm = ({ goBack }: { goBack: () => void }) => {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setSubmitting(true);
     const { frequency, date } = values;
-    const res = await fetch("/api/goals/create", {
-      method: "POST",
-      body: JSON.stringify({
-        userId: session?.user.id,
-        frequency,
-        date,
-        type: "consistency",
-      }),
-    });
+    // Validation
+    if (parseInt(frequency) > 7 || parseInt(frequency) < 1) {
+      // Failed validation
+      toast({
+        title: "Improper Input ❌",
+        description: "Frequency must be between 1 and 7 (inclusive)",
+      });
+    } else {
+      // Passed validation
+      const res = await fetch("/api/goals/create", {
+        method: "POST",
+        body: JSON.stringify({
+          userId: session?.user.id,
+          frequency,
+          date,
+          type: "consistency",
+        }),
+      });
 
-    if (res.status === 200) {
-      toast({
-        title: "Successfully created goal ✅",
-        description: "Your goal has been created successfully",
-      });
-    } else if (res.status === 500) {
-      toast({
-        title: "Server error trying to create goal ❌",
-        description: "There was an error while trying to create your goal",
-      });
+      if (res.status === 200) {
+        toast({
+          title: "Successfully created goal ✅",
+          description: "Your goal has been created successfully",
+        });
+      } else if (res.status === 500) {
+        toast({
+          title: "Server error trying to create goal ❌",
+          description: "There was an error while trying to create your goal",
+        });
+      }
     }
+
     setSubmitting(false);
   };
 

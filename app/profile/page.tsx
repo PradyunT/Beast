@@ -56,7 +56,6 @@ const formSchema = z.object({
 const Profile = () => {
   const { data: session, status } = useSession();
   const [profile, setProfile] = useState<ProfileProps | null>(null);
-  const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [createGoalMode, setCreateGoalMode] = useState(false);
@@ -109,8 +108,7 @@ const Profile = () => {
       });
       const data = await res.json();
       setProfile(data);
-      console.log(data);
-      setLoading(false);
+
     } catch (err) {
       console.error("Error fetching profile: ", err);
     }

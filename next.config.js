@@ -3,7 +3,7 @@ const withPWA = require("next-pwa")({
   dest: "public",
 });
 
-const nextConfig = {
+const settings = {
   webpack: (config, options) => {
     config.module.rules.push({
       test: /\.(mp4|webm)$/i,
@@ -21,4 +21,4 @@ const nextConfig = {
   },
 };
 
-module.exports = withPWA({ nextConfig });
+module.exports = withPWA({ settings });
