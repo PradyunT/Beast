@@ -15,7 +15,10 @@ const goalSchema = new Schema({
   consistency: {
     frequency: Number,
     initFrequency: Number,
-    latestUpdateDate: { type: Date, default: Date.now() },
+    latestUpdateDate: {
+      type: Date,
+      default: () => new Date(Date.now() - 24 * 60 * 60 * 1000), // Subtract one day in milliseconds
+    },
     weekLog: [{ date: Date, logs: Number }],
   },
   weight: {

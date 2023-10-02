@@ -17,6 +17,7 @@ const workoutSchema = new Schema({
     type: Date,
     default: Date.now,
   },
+  quickUpdate: { type: Boolean, default: false },
 });
 
 const Workout = models.Workout || model("Workout", workoutSchema);
