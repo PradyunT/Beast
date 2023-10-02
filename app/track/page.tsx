@@ -62,7 +62,7 @@ interface Workout {
 
 const gymLat = 33.212060808618546;
 const gymLong = -97.15406761440391;
-const radius: number = 200; // FIXME
+const radius: number = 0.5; // FIXME
 
 // For plain text input
 const formSchema = z.object({
