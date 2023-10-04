@@ -62,7 +62,7 @@ interface Workout {
 
 const gymLat = 33.212060808618546;
 const gymLong = -97.15406761440391;
-const radius: number = 1; // FIXME
+const radius: number = 0.5; // FIXME
 
 // For plain text input
 const formSchema = z.object({
@@ -460,7 +460,22 @@ const Track = () => {
             });
           } else if (res.status === 200) {
             // If the user has not already tracked a workout today: good to go
-            setTrackMode(1);
+            const res = await fetch(`/api/quick-update/${session?.user?.id}`, {
+              method: "POST",
+            });
+            // FIXME
+            if (res.status === 200) {
+              toast({
+                title: "Updated",
+                description: "✅ Quick update successful",
+              });
+            } else if (res.status === 500) {
+              setError2("❌ Failed to Quick Update");
+              toast({
+                title: "Error",
+                description: "❌ Failed to Quick Update",
+              });
+            }
           }
         } else {
           // If the user is out of range of Pohl Rec Center
